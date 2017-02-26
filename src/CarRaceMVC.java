@@ -1,82 +1,154 @@
 import java.util.ArrayList;
-import javafx.application.*;
+
+import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 public class CarRaceMVC extends Application
-{ private Button btnNewWindow = new Button("New Race");
-  private ArrayList<Controller> controllerList;
-  private ArrayList<View> viewList;
-  private ArrayList<Model> modelList;
-  private int raceCounter = 0;
-  private CarLog log;
-  @Override
-  public void start(Stage primaryStage)
-  {	BorderPane pane = new BorderPane();
-	pane.setCenter(btnNewWindow);
-	pane.setStyle("-fx-background-color: orange");
-	Scene scene = new Scene(pane, 400, 100);
-	primaryStage.setScene(scene); // Place the scene in the stage
-	primaryStage.setTitle("CarRaceMVC"); // Set the stage title
-	primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>()
-	{ @Override
-	  public void handle(WindowEvent event)
-	  {	try
-	    { Platform.exit();
+{ 
+	private Button btnServer = new Button("Server");
+	private Button btnRace = new Button("Race");
+	private Button btnGambler = new Button("Gambler");
+	private ArrayList<Controller> controllerList;
+	private ArrayList<View> viewList;
+	private ArrayList<Model> modelList;
+	private int raceCounter = 0;
+	private boolean isServerOn = false;
+	private CarLog log;
+
+	@Override
+	public void start(Stage primaryStage)
+	{	
+		BorderPane pane = new BorderPane();
+		pane.setPadding(new Insets(40));
+		pane.setLeft(btnServer);
+		BorderPane.setAlignment(btnServer, Pos.CENTER_LEFT);
+		pane.setCenter(btnRace);
+		pane.setRight(btnGambler);
+		BorderPane.setAlignment(btnGambler, Pos.CENTER_RIGHT);
+		pane.setStyle("-fx-background-color: orange");
+		Scene scene = new Scene(pane, 400, 100);
+		primaryStage.setScene(scene); // Place the scene in the stage
+		primaryStage.setTitle("CarRaceMVC"); // Set the stage title
+		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>()
+		{ @Override
+			public void handle(WindowEvent event)
+		{	try
+		{ Platform.exit();
 		} 
-	    catch (Exception e)
-	    { // TODO Auto-generated catch block
-		  e.printStackTrace();
+		catch (Exception e)
+		{ // TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-	  }
-	});
-	controllerList = new ArrayList<Controller>();
-	viewList = new ArrayList<View>();
-	modelList = new ArrayList<Model>();
-	btnNewWindow.setOnAction(new EventHandler<ActionEvent>()
-	{ @Override
-	  public void handle(ActionEvent event)
-	  {	createNewWindow();
-	  }
-	});
-	primaryStage.show(); // Display the stage
-	primaryStage.setAlwaysOnTop(true);
-  }
-  public static void main(String[] args)
-  {	launch(args);
-  }
-  public void createNewWindow()
-  {	Model model = new Model(raceCounter);
-	View view = new View();
-	Controller controller = new Controller(model, view);
-	view.setModel(model);
-	modelList.add(model);
-	viewList.add(view);
-	controllerList.add(controller);
-	Stage stg = new Stage();
-	Scene scene = new Scene(view.getBorderPane(), 750, 500);
-	controller.setOwnerStage(stg);
-	view.createAllTimelines();
-	stg.setScene(scene);
-	raceCounter++;
-	stg.setTitle("CarRaceView" + raceCounter);
-	stg.setAlwaysOnTop(true);
-	stg.show();
-	scene.widthProperty().addListener(
-	  new ChangeListener<Number>()
-	{ @Override
-	  public void changed(
-		ObservableValue<? extends Number> observable,
-		  Number oldValue, Number newValue)
-	  {	// TODO Auto-generated method stub
-		view.setCarPanesMaxWidth(newValue.doubleValue());
-	  }
- 	});
-   }
+		}
+		});
+		controllerList = new ArrayList<Controller>();
+		viewList = new ArrayList<View>();
+		modelList = new ArrayList<Model>();
+		
+		//button to start the multi thread server. must be the first click.
+		//create separate thread to each race.
+		btnServer.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				try {
+					Stage server = new Stage();
+					new Server().start(server);
+					isServerOn = true;
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		//button to start the race. check that server is on.
+		btnRace.setOnAction(new EventHandler<ActionEvent>()
+		{ @Override
+			public void handle(ActionEvent event)
+		{	
+			if(isServerOn)
+				createNewWindow();
+			else{
+				alert(AlertType.ERROR, "You should run the server first");
+			}
+		}
+		});
+		
+		//button to start gambler. get list view of available races
+		//from server (kind of client) and gamble on cars he want.
+		//send which race and the amount of money of each car to server.
+		btnGambler.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				Stage gambler = new Stage();
+				try {
+					if(isServerOn)
+						new Gambler().start(gambler);
+					else{
+						alert(AlertType.ERROR, "You should run the server first");
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		primaryStage.show(); // Display the stage
+		//primaryStage.setAlwaysOnTop(true);
+	}
+
+	public static void main(String[] args)
+	{	
+		launch(args);
+	}
+
+	public void createNewWindow()
+	{	
+		Model model = new Model(raceCounter);
+		View view = new View();
+		Controller controller = new Controller(model, view);
+		view.setModel(model);
+		modelList.add(model);
+		viewList.add(view);
+		controllerList.add(controller);
+		Stage stg = new Stage();
+		Scene scene = new Scene(view.getBorderPane(), 750, 500);
+		controller.setOwnerStage(stg);
+		view.createAllTimelines();
+		stg.setScene(scene);
+		raceCounter++;
+		stg.setTitle("CarRaceView" + raceCounter);
+		stg.setAlwaysOnTop(true);
+		stg.show();
+		scene.widthProperty().addListener(
+				new ChangeListener<Number>()
+				{ @Override
+					public void changed(
+							ObservableValue<? extends Number> observable,
+							Number oldValue, Number newValue)
+				{	// TODO Auto-generated method stub
+					view.setCarPanesMaxWidth(newValue.doubleValue());
+				}
+				});
+	}
+	
+	public void alert(AlertType type,String msg)
+	{ 
+		Alert alert = new Alert(type);
+		alert.setContentText(msg);
+		alert.setHeaderText(null);
+		alert.showAndWait();
+	}
 }
