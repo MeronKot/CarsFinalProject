@@ -26,7 +26,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class Gambler extends Application{
+public class Gambler extends Application {
 
 	private final int MAX_CARS = 5;
 	private int availableRaces;
@@ -37,9 +37,10 @@ public class Gambler extends Application{
 	private Socket socket;
 	private ObjectOutputStream toServer;
 	private ObjectInputStream fromServer;
+	private Stage currentStage;
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		
+
 		//open connection to server to send the gambling
 		try
 		{
@@ -50,7 +51,7 @@ public class Gambler extends Application{
 		}catch(IOException e){
 			System.out.println(e.getMessage());
 		}
-		
+
 		BorderPane mainPane = new BorderPane();
 
 		//Active races: + listView of races
@@ -61,8 +62,9 @@ public class Gambler extends Application{
 		GridPane carsGambling = createCarsGamblingPane();
 		mainPane.setCenter(carsGambling);
 
-		
+
 		Scene scene = new Scene(mainPane,250,350);
+		currentStage = primaryStage;
 		primaryStage.setTitle("Gambler");
 		primaryStage.setScene(scene);
 		primaryStage.show();
@@ -120,18 +122,25 @@ public class Gambler extends Application{
 		go.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				HashMap<Integer,Double> arr = new HashMap<>();
-				arr.put(0,Double.parseDouble(races.getSelectionModel().getSelectedItem().toString()));
-				for (int i = 0 ; i < MAX_CARS ; i++)
-					if(!(money[i].getText().equals("")))
-						arr.put(i+1,Double.parseDouble(money[i].getText()));
-				try
-				{
-					toServer.writeObject(arr);
-				}catch(IOException e){
-					System.out.println(e.getMessage());
+				if (availableRaces > 0){
+					HashMap<Integer,Double> arr = new HashMap<>();
+					arr.put(0,Double.parseDouble(races.getSelectionModel().getSelectedItem().toString()));
+					for (int i = 0 ; i < MAX_CARS ; i++)
+						if(!(money[i].getText().equals("")))
+							arr.put(i+1,Double.parseDouble(money[i].getText()));
+					try
+					{
+						PacketToServer packet = new PacketToServer(arr);
+						toServer.writeObject(packet);
+						alert(AlertType.INFORMATION,"Goodluck");
+						currentStage.close();
+					}catch(IOException e){
+						System.out.println(e.getMessage());
+					}
+				}else{
+					alert(AlertType.ERROR,"No available races");
+					currentStage.close();
 				}
-				alert(AlertType.INFORMATION,"Goodluck");
 			}
 		});
 		grid.add(go, 1, cars.length);

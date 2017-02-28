@@ -1,10 +1,12 @@
+import java.io.Serializable;
+
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-public class CarLog extends Stage
+public class CarLog extends Stage implements Serializable
 { private ScrollPane srcPane;
   private VBox vBoxInSrcPane;
   private BorderPane mainFrame;

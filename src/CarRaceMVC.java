@@ -1,3 +1,7 @@
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 
 import javafx.application.Application;
@@ -25,11 +29,14 @@ public class CarRaceMVC extends Application
 	private ArrayList<Model> modelList;
 	private int raceCounter = 0;
 	private boolean isServerOn = false;
+	private Socket socket;
+	private ObjectOutputStream toServer;
+	private ObjectInputStream fromServer;
 	private CarLog log;
 
 	@Override
 	public void start(Stage primaryStage)
-	{	
+	{			
 		BorderPane pane = new BorderPane();
 		pane.setPadding(new Insets(40));
 		pane.setLeft(btnServer);
@@ -66,6 +73,16 @@ public class CarRaceMVC extends Application
 					Stage server = new Stage();
 					new Server().start(server);
 					isServerOn = true;
+					
+					//open connection to server to send the gambling
+					try
+					{
+						socket = new Socket("localhost", 8000);
+						toServer = new ObjectOutputStream(socket.getOutputStream());
+						fromServer = new ObjectInputStream(socket.getInputStream());
+					}catch(IOException e){
+						System.out.println(e.getMessage());
+					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -116,17 +133,26 @@ public class CarRaceMVC extends Application
 
 	public void createNewWindow()
 	{	
-		Model model = new Model(raceCounter);
-		View view = new View();
-		Controller controller = new Controller(model, view);
-		view.setModel(model);
-		modelList.add(model);
-		viewList.add(view);
-		controllerList.add(controller);
+		//Model model = new Model(raceCounter);
+		//View view = new View();
+		
+		try
+		{
+			PacketToServer packet = new PacketToServer();
+			toServer.writeObject(packet);
+		}catch(IOException e){
+			System.out.println(e.getMessage());
+		}
+		/*
+		//Controller controller = new Controller(model, view);
+		//view.setModel(model);
+		//modelList.add(model);
+		//viewList.add(view);
+		//controllerList.add(controller);
 		Stage stg = new Stage();
 		Scene scene = new Scene(view.getBorderPane(), 750, 500);
-		controller.setOwnerStage(stg);
-		view.createAllTimelines();
+		//controller.setOwnerStage(stg);
+		//view.createAllTimelines();
 		stg.setScene(scene);
 		raceCounter++;
 		stg.setTitle("CarRaceView" + raceCounter);
@@ -139,9 +165,10 @@ public class CarRaceMVC extends Application
 							ObservableValue<? extends Number> observable,
 							Number oldValue, Number newValue)
 				{	// TODO Auto-generated method stub
-					view.setCarPanesMaxWidth(newValue.doubleValue());
+					//view.setCarPanesMaxWidth(newValue.doubleValue());
 				}
 				});
+				*/
 	}
 	
 	public void alert(AlertType type,String msg)

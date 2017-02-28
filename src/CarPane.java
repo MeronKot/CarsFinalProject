@@ -47,11 +47,16 @@ public class CarPane extends Pane implements CarEvents
 	private Color color;
 	private int r;// radius
 	private Car car;
-
+	private Color colors[] = { Color.RED, Color.AQUA, Color.BLUE, Color.GREEN,
+			Color.YELLOW, Color.ORANGE, Color.PINK, Color.VIOLET, 
+			Color.WHITE, Color.TRANSPARENT
+	};
+	
 	public CarPane()
 	{	
 		xCoor = 0;
 		r = 5;
+		color = colors[(int)(Math.random() * 10)];
 	}
 
 	public void setCarModel(Car myCar)
@@ -72,6 +77,8 @@ public class CarPane extends Pane implements CarEvents
 
 	public void moveCar(int n)
 	{	
+
+
 		yCoor = getHeight();
 		setMinSize(10 * r, 6 * r);
 		if (xCoor > getWidth())
@@ -107,7 +114,7 @@ public class CarPane extends Pane implements CarEvents
 			//in future to write method to calculate according to song
 			//or each half minute
 			//moveCar(MOVE);
-			moveCar(rand.nextInt(10)); // move car pane according to limits
+			moveCar(STOP); // move car pane according to limits
 		};
 		tl = new Timeline();
 		tl.setCycleCount(Timeline.INDEFINITE);
@@ -132,7 +139,7 @@ public class CarPane extends Pane implements CarEvents
 		this.r = r;
 		if (car.getSpeed() == STOP) moveCar(STOP);
 	}
-	
+
 	public void setSpeed(double speed)
 	{	
 		if (speed == STOP)
@@ -145,12 +152,12 @@ public class CarPane extends Pane implements CarEvents
 			tl.play();
 		}
 	}
-	
+
 	public double getX()
 	{	
 		return xCoor;
 	}
-	
+
 	public double getY()
 	{	
 		return yCoor;

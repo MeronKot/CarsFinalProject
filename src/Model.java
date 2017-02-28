@@ -12,7 +12,7 @@ public class Model
 	public Model(int raceCounter)
 	{	
 		this.raceCounter = raceCounter;
-		this.log=new CarLog(this.raceCounter);
+		//this.log=new CarLog(this.raceCounter);
 		c1=new Car(0,raceCounter,log);
 		c2=new Car(1,raceCounter,log);
 		c3=new Car(2,raceCounter,log);
