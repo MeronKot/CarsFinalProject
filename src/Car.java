@@ -14,7 +14,7 @@ public class Car implements CarEvents
 	private Color color;
 	private int wheelRadius;
 	private Map<eventType, ArrayList<EventHandler<Event>>> carHashMap;
-	
+
 	public Car(int id, int model_id, CarLog log)
 	{	
 		this.id = id;
@@ -54,38 +54,42 @@ public class Car implements CarEvents
 	{	this.wheelRadius = wheelRadius;
 	processEvent(eventType.RADIUS, new ActionEvent());
 	}
-	public synchronized void addEventHandler(
-			EventHandler<Event> l, eventType et)
-	{	ArrayList<EventHandler<Event>> al;
-	al = carHashMap.get(et);
-	if (al == null)
-		al = new ArrayList<EventHandler<Event>>();
-	al.add(l);
-	carHashMap.put(et, al);
+	public synchronized void addEventHandler(EventHandler<Event> l, eventType et)
+	{	
+		ArrayList<EventHandler<Event>> al;
+		al = carHashMap.get(et);
+		if (al == null)
+			al = new ArrayList<EventHandler<Event>>();
+		al.add(l);
+		carHashMap.put(et, al);
 	}
-	public synchronized void removeEventHandler(
-			EventHandler<Event> l, eventType et)
-	{	ArrayList<EventHandler<Event>> al;
-	al = carHashMap.get(et);
-	if (al != null && al.contains(l))
-		al.remove(l);
-	carHashMap.put(et, al);
+	
+	public synchronized void removeEventHandler(EventHandler<Event> l, eventType et)
+	{	
+		ArrayList<EventHandler<Event>> al;
+		al = carHashMap.get(et);
+		if (al != null && al.contains(l))
+			al.remove(l);
+		carHashMap.put(et, al);
 	}
+	
 	private void processEvent(eventType et, Event e)
-	{	String msg;
-	ArrayList<EventHandler<Event>> al;
-	synchronized (this)
-	{ al = carHashMap.get(et);
-	if (al == null) return;
-	}
-	msg = "CarRaceView" + (getModelId() + 1) + " | car number: "
-			+ (getId() + 1) + " | actionCommand: " + et.toString()
-			+ " | array size is: " + al.size();
-	log.printMsg(msg);
-	for (int i = 0; i < al.size(); i++)
-	{ EventHandler<Event> handler = 
-	(EventHandler<Event>) al.get(i);
-	handler.handle(e);
-	}
+	{	
+		String msg;
+		ArrayList<EventHandler<Event>> al;
+		synchronized (this)
+		{ 
+			al = carHashMap.get(et);
+			if (al == null) return;
+		}
+		msg = "CarRaceView" + (getModelId() + 1) + " | car number: "
+				+ (getId() + 1) + " | actionCommand: " + et.toString()
+				+ " | array size is: " + al.size();
+		//log.printMsg(msg);
+		for (int i = 0; i < al.size(); i++)
+		{ 
+			EventHandler<Event> handler = (EventHandler<Event>) al.get(i);
+			handler.handle(e);
+		}
 	}
 }

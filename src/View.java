@@ -1,7 +1,14 @@
+import java.io.File;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -12,6 +19,11 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.media.AudioSpectrumListener;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaMarkerEvent;
+import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 public class View implements Serializable
 { 
 	private Model model;
@@ -24,15 +36,53 @@ public class View implements Serializable
 	private ComboBox<String> colorComBox, carIdComBox;
 	private ObservableList<String> items_color, items_car;
 	private Button btn;
+	private String [] musicFile = {"3 - How Bad Do You Want It - Fast & Furious 7.mp3",
+			"4 - Get Low - Fast & Furious 7.mp3"};
+	private Media sound;
+	private MediaPlayer mediaPlayer;
+	private Duration length;
+	private int times;
 
 	public View()
 	{	
+		int Low = 0;
+		int High = 2;
+		Random rand = new Random();
 		border_pane = new BorderPane();
 		//createDetailsGrid();
 		//border_pane.setTop(details_grid);
 		createCarsGrid();
 		border_pane.setCenter(cars_grid);
+		sound = new Media(new File(musicFile[rand.nextInt(High - Low) + Low]).toURI().toString());
+		mediaPlayer = new MediaPlayer(sound);
+		mediaPlayer.setOnEndOfMedia(new Runnable() {
+			@Override
+			public void run() {
+				endRace();
+				model.calculateWinners(length.toMinutes(),times);
+			}
+		});
 	}
+
+	public void endRace() {
+		car_pane1.getTimeline().pause();
+		car_pane2.getTimeline().pause();
+		car_pane3.getTimeline().pause();
+		car_pane4.getTimeline().pause();
+		car_pane5.getTimeline().pause();
+	}
+	
+	public void randomSpeed(HashMap<Integer, Double> hashMap){
+		Iterator it = hashMap.entrySet().iterator();
+		Random rand = new Random();
+		int Low = 1;
+		int High = 50;
+		while (it.hasNext()) {
+	        Map.Entry pair = (Map.Entry)it.next();
+	        model.changeSpeed((int) pair.getKey(), rand.nextInt(High - Low) + Low);
+	    }	
+	}
+	
 	public void setModel(Model myModel)
 	{	
 		model = myModel;
@@ -232,5 +282,25 @@ public class View implements Serializable
 	public Slider getRadSlider()
 	{	
 		return slRadius;
+	}
+	
+	public void playSong(HashMap<Integer, Double> hashMap) {
+		//mediaPlayer.play();
+		//length = mediaPlayer.getTotalDuration();
+		length = sound.getDuration();
+		int interval = 1;//one second
+		ObservableMap<String, Duration> partsMap = sound.getMarkers();
+		times = 0;
+		for (times = 0 ; times < length.toMinutes() ; times += interval){
+			partsMap.put("part" + times, Duration.minutes(times));
+		}
+		
+		mediaPlayer.setOnMarker(new EventHandler<MediaMarkerEvent>() {	
+			@Override
+			public void handle(MediaMarkerEvent event) {
+				randomSpeed(hashMap);				
+			}
+		});
+		mediaPlayer.play();
 	}
 }

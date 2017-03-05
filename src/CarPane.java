@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.Random;
 
 import javafx.animation.KeyFrame;
@@ -6,6 +7,8 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
@@ -51,6 +54,8 @@ public class CarPane extends Pane implements CarEvents
 			Color.YELLOW, Color.ORANGE, Color.PINK, Color.VIOLET, 
 			Color.WHITE, Color.TRANSPARENT
 	};
+	
+
 	
 	public CarPane()
 	{	
@@ -106,7 +111,7 @@ public class CarPane extends Pane implements CarEvents
 	}
 
 	public void createTimeline()
-	{	
+	{			
 		Random rand = new Random();
 		EventHandler<ActionEvent> eventHandler = e ->
 		{ 
@@ -114,7 +119,7 @@ public class CarPane extends Pane implements CarEvents
 			//in future to write method to calculate according to song
 			//or each half minute
 			//moveCar(MOVE);
-			moveCar(STOP); // move car pane according to limits
+			moveCar(MOVE);// move car pane according to limits
 		};
 		tl = new Timeline();
 		tl.setCycleCount(Timeline.INDEFINITE);

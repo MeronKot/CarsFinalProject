@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -23,13 +24,13 @@ import sun.util.xml.PlatformXmlPropertiesProvider;
 
 public class Server extends Application{
 
-	private TextArea ta = new TextArea();
+	private static TextArea ta = new TextArea();
 	private ServerSocket serverSocket;
 	private Socket socket;
 	private ArrayList <View> viewList = new ArrayList<>();
 	private ArrayList <Controller> controllerList = new ArrayList<>();
 	private ArrayList <Model> modelList = new ArrayList<>();
-	private ArrayList <HashMap<Integer,Double>> gamblers = new ArrayList<>();
+	private ArrayList <PacketToServer> gamblers = new ArrayList<>();
 	private int races = 0;
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -85,18 +86,19 @@ public class Server extends Application{
 				while (true){
 					PacketToServer packet = (PacketToServer)inputFromClient.readObject();
 					if(packet.gamblerClient()){
-						gamblers.add(packet.getGamblerAmounts());
+						gamblers.add(packet);
+						//modelList.get(packet.getRaceId() - 1).setGambler(packet.getGamblerAmounts());
+						checkAndStartRace(packet);
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
-								HashMap<Integer, Double> gam = packet.gamblerAmounts;
-								ta.appendText("New gambler, race no: " + gam.get(0) + '\n');
+								HashMap<Integer, Double> gam = packet.getGamblerAmounts();
+								ta.appendText("New gambler, race no: " + packet.getRaceId() + '\n');
 								Iterator it = gam.entrySet().iterator();
-							    it.next();
 								while (it.hasNext()) {
-							        Map.Entry pair = (Map.Entry)it.next();
-							        ta.appendText(pair.getKey() + "\t" + pair.getValue() + '\n');
-							    }							
+									Map.Entry pair = (Map.Entry)it.next();
+									ta.appendText(((Integer)pair.getKey() + 1) + "\t" + pair.getValue() + '\n');
+								}
 							}
 						});
 					}else{
@@ -140,17 +142,6 @@ public class Server extends Application{
 							}
 						});
 					}
-
-					/*
-					//get from gambler how much he gambles on every car hash(Car,Amount)
-					HashMap<Integer,Double> something = (HashMap<Integer, Double>) inputFromClient.readObject();
-					//just for checking
-					Iterator it = something.entrySet().iterator();
-				    while (it.hasNext()) {
-				        Map.Entry pair = (Map.Entry)it.next();
-				        System.out.println(pair.getKey() + "\t" + pair.getValue());
-				    }
-					 */
 				}
 			} catch (IOException | ClassNotFoundException e) {
 				ta.appendText(e.getMessage());
@@ -164,5 +155,18 @@ public class Server extends Application{
 
 		}
 
+	}
+
+	public void checkAndStartRace(PacketToServer packet) {
+		int raceId = packet.getRaceId();
+		Model modelOfCurrentRace = modelList.get(raceId - 1);
+		View viewOfCurrentRace = viewList.get(raceId - 1);
+		Random rand = new Random();
+		int Low = 1;
+		int High = 50;
+
+		modelOfCurrentRace.setGambler(packet.getGamblerAmounts());
+		if(packet.getGamblerAmounts().size() >= 3)
+			viewOfCurrentRace.playSong(packet.getGamblerAmounts());
 	}
 }

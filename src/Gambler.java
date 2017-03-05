@@ -38,6 +38,7 @@ public class Gambler extends Application {
 	private ObjectOutputStream toServer;
 	private ObjectInputStream fromServer;
 	private Stage currentStage;
+	private int raceId;
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
@@ -124,13 +125,13 @@ public class Gambler extends Application {
 			public void handle(ActionEvent event) {
 				if (availableRaces > 0){
 					HashMap<Integer,Double> arr = new HashMap<>();
-					arr.put(0,Double.parseDouble(races.getSelectionModel().getSelectedItem().toString()));
 					for (int i = 0 ; i < MAX_CARS ; i++)
 						if(!(money[i].getText().equals("")))
-							arr.put(i+1,Double.parseDouble(money[i].getText()));
+							arr.put(i,Double.parseDouble(money[i].getText()));
 					try
 					{
-						PacketToServer packet = new PacketToServer(arr);
+						raceId = races.getSelectionModel().getSelectedItem();
+						PacketToServer packet = new PacketToServer(arr,raceId);
 						toServer.writeObject(packet);
 						alert(AlertType.INFORMATION,"Goodluck");
 						currentStage.close();
