@@ -6,6 +6,7 @@ import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -46,6 +47,7 @@ public class CarPane extends Pane implements CarEvents
 	final int STOP=0;
 	private double xCoor;
 	private double yCoor;
+	private double shade = 1;
 	private Timeline tl; // speed=setRate()
 	private Color color;
 	private int r;// radius
@@ -54,7 +56,8 @@ public class CarPane extends Pane implements CarEvents
 			Color.YELLOW, Color.ORANGE, Color.PINK, Color.VIOLET, 
 			Color.WHITE, Color.TRANSPARENT
 	};
-	
+	Polygon back,front,rightUp,rightDown,leftUp,leftDown,top,left,right;
+	Group carGroup;
 
 	
 	public CarPane()
@@ -84,8 +87,6 @@ public class CarPane extends Pane implements CarEvents
 
 	public void moveCar(int n)
 	{	
-
-
 		yCoor = getHeight();
 		setMinSize(10 * r, 6 * r);
 		if (xCoor > getWidth())
@@ -95,21 +96,107 @@ public class CarPane extends Pane implements CarEvents
 		{ xCoor += n;
 		}
 		// Draw the car
-		Polygon polygon = 
-				new Polygon(xCoor, yCoor - r, xCoor, 
-						yCoor - 4 * r, xCoor + 2 * r, yCoor - 4 * r, 
-						xCoor + 4 * r, yCoor - 6 * r, xCoor + 6 * r, 
-						yCoor - 6 * r, xCoor + 8 * r, yCoor - 4 * r,
-						xCoor + 10 * r, yCoor - 4 * r, xCoor + 10 * r, 
-						yCoor - r);
-		polygon.setFill(color);
-		polygon.setStroke(Color.BLACK);
+		carGroup = new Group();
+		front = new Polygon(xCoor, yCoor - r,
+							xCoor, yCoor - 4 * r,
+							xCoor + 2 * r, yCoor - 4 * r, 
+							xCoor + 4 * r, yCoor - 6 * r,
+							xCoor + 6 * r, yCoor - 6 * r, 
+							xCoor + 8 * r, yCoor - 4 * r,
+							xCoor + 10 * r,yCoor - 4 * r,
+							xCoor + 10 * r,yCoor - r);
+		front.setFill(color);
+		front.setStroke(Color.BLACK);
+
+		back = new Polygon(xCoor+3, (yCoor - r)-5,
+						   xCoor+3, (yCoor - 4 * r)-2,
+						   (xCoor + 2 * r)-2, (yCoor - 4 * r)-2, 
+						   (xCoor + 4 * r)+2 , (yCoor - 6 * r)-5,
+						   (xCoor + 6 * r)+2, (yCoor - 6 * r)-5, 
+						   (xCoor + 8 * r)+2, (yCoor - 4 * r)-4,
+						   (xCoor + 10 * r)+4, (yCoor - 4 * r)-4,
+						   (xCoor + 10 * r)+4,(yCoor - r)-5);
+    	
+		back.setTranslateZ(100);
+    	back.setFill(color.deriveColor(0.0, 1.0, (1 - 0.6* shade), 1.0));
+		back.setStroke(Color.BLACK);
+
+    	top = new Polygon(xCoor + 4 * r, yCoor - 6 * r,
+						  xCoor + 6 * r, yCoor - 6 * r,
+						  (xCoor + 6 * r)+2, (yCoor - 6 * r)-5,
+						  (xCoor + 4 * r)+2 , (yCoor - 6 * r)-5);
+    	top.setFill(color.deriveColor(0.0, 1.0, (1 - 0.5 * shade), 1.0));
+    	top.setTranslateZ(-0.5);
+		top.setStroke(Color.BLACK);
+
+    	
+    	leftUp = new Polygon(xCoor + 2 * r, yCoor - 4 * r, 
+    						 xCoor + 4 * r, yCoor - 6 * r,
+    						 (xCoor + 4 * r)+2 , (yCoor - 6 * r)-4,
+    						 (xCoor + 2 * r)-2, (yCoor - 4 * r)-2);
+    	
+    	leftUp.setFill(color.deriveColor(0.0, 1.0, (1 - 0.9 * shade), 1.0));
+    	leftUp.setTranslateZ(-0.5);
+		leftUp.setStroke(Color.BLACK);
+
+    	leftDown = new Polygon(xCoor, yCoor - 4 * r,
+    						   xCoor + 2 * r, yCoor - 4 * r,
+    						  (xCoor + 2 * r)-2, (yCoor - 4 * r)-2,
+    						   xCoor+3, (yCoor - 4 * r)-2); 
+    	leftDown.setFill(color.deriveColor(0.0, 1.0, (1 - 0.6 * shade), 1.0));
+    	leftDown.setTranslateZ(-0.5);
+		leftDown.setStroke(Color.BLACK);
+
+		left = new Polygon(xCoor, yCoor - r,
+						   xCoor+3, (yCoor - r)-5,
+						   xCoor+3, (yCoor - 4 * r)-2,
+						   xCoor, yCoor - 4 * r);
+    	left.setFill(color.deriveColor(0.0, 1.0, (1 - 0.6 * shade), 1.0));
+		left.setStroke(Color.BLACK);
+    	leftDown.setTranslateZ(-0.5);
+
+    	rightUp = new Polygon(xCoor + 6 * r, yCoor - 6 * r, 
+    						   xCoor + 8 * r, yCoor - 4 * r,
+    						  (xCoor + 8 * r)+2, (yCoor - 4 * r)-3,
+   						      (xCoor + 6 * r)+2, (yCoor - 6 * r)-5);
+    	rightUp.setFill(color.deriveColor(0.0, 1.0, (1 - 0.6 * shade), 1.0));
+		rightUp.setStroke(Color.BLACK);
+		
+		rightDown = new Polygon(xCoor + 8 * r, yCoor - 4 * r,
+								xCoor + 10 * r,yCoor - 4 * r,
+							   (xCoor + 10 * r)+4, (yCoor - 4 * r)-4,
+							   (xCoor + 8 * r)+4, (yCoor - 4 * r)-4);
+		rightDown.setFill(color.deriveColor(0.0, 1.0, (1 - 0.6 * shade), 1.0));
+		rightDown.setStroke(Color.BLACK);
+		
+		right = new Polygon(xCoor + 10 * r,yCoor - 4 * r,
+							xCoor + 10 * r,(yCoor - r)-1,
+						   (xCoor + 10 * r)+4,(yCoor - r)-4,
+						   (xCoor + 10 * r)+4, (yCoor - 4 * r)-3);
+		right.setFill(color.deriveColor(0.0, 1.0, (1 - 0.6 * shade), 1.0));
+		right.setStroke(Color.BLACK);
+		
+		Polygon light1 = new Polygon((xCoor + 10 * r)+3,yCoor - 4 * r,
+									 (xCoor + 10 * r)+50,(yCoor - 4 * r)-10,
+									 (xCoor + 10 * r)+50,(yCoor - 4 * r)+10);
+		light1.setFill(Color.YELLOW);
+		
+		Polygon light2 = new Polygon((xCoor + 10 * r)+3,yCoor - 4 * r+10,
+				 					 (xCoor + 10 * r)+50,(yCoor - 4 * r),
+				 					(xCoor + 10 * r)+50,(yCoor - 4 * r)+20);
+		light2.setFill(Color.YELLOW);
+		
 		// Draw the wheels
-		Circle wheel1 = 
-				new Circle(xCoor + r * 3, yCoor - r, r, Color.BLACK);
-		Circle wheel2 = new Circle(xCoor + r * 7, yCoor - r, r, Color.BLACK);
+		Color colorW = Color.BLACK;
+		Circle wheelFront1 = new Circle(xCoor + r * 3, yCoor - r, r,colorW);
+		Circle wheelBack1 = new Circle((xCoor + r * 3)+3, yCoor - r, r, Color.GREY);
+		Circle wheelFront2 = new Circle(xCoor + r * 7, yCoor - r, r, colorW);
+		Circle wheelBack2 = new Circle((xCoor + r * 7)+3, yCoor - r, r, Color.GREY);
+		
+		carGroup.getChildren().clear();
 		getChildren().clear();
-		getChildren().addAll(polygon, wheel1, wheel2);
+		carGroup.getChildren().addAll(wheelBack1,wheelBack2,back,leftUp,leftDown,left,rightUp,rightDown,right,front,top, wheelFront1, wheelFront2,light1,light2);
+		getChildren().add(carGroup);
 	}
 
 	public void createTimeline()
