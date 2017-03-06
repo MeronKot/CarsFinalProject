@@ -141,6 +141,7 @@ public class Model
 	}
 
 	public void saveRaceDB(Statement statement,Connection con) throws SQLException {
+		//totalGamblingAmount and carsCompete are null
 		PreparedStatement pst = con.prepareStatement("insert into race values(?,?,?,?,?)");
 		pst.setString(1, String.valueOf(raceCounter));
 		pst.setString(2, carsCompete);
