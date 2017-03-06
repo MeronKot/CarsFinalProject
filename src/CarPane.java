@@ -61,12 +61,14 @@ public class CarPane extends Pane implements CarEvents
 	{	
 		xCoor = 0;
 		r = 5;
-		color = colors[(int)(Math.random() * 10)];
+		int idx = (int)(Math.random() * 10);
+		color = colors[idx];
 	}
 
 	public void setCarModel(Car myCar)
 	{	
 		car = myCar;
+		car.setColor(color);
 		if (car != null)
 		{ 
 			car.addEventHandler(new ColorEvent(), eventType.COLOR);

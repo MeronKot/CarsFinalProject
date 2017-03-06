@@ -1,9 +1,15 @@
 import java.io.File;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+
+import com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet;
+
+import java.sql.Statement;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -42,12 +48,15 @@ public class View implements Serializable
 	private MediaPlayer mediaPlayer;
 	private Duration length;
 	private int times;
-
-	public View()
+	private Statement statement;
+	
+	public View(Statement statement,Connection con) throws SQLException
 	{	
 		int Low = 0;
 		int High = 2;
 		Random rand = new Random();
+		this.statement = statement;
+		
 		border_pane = new BorderPane();
 		//createDetailsGrid();
 		//border_pane.setTop(details_grid);
@@ -60,8 +69,35 @@ public class View implements Serializable
 			public void run() {
 				endRace();
 				model.calculateWinners(length.toMinutes(),times);
+				try {
+					model.saveRaceDB(statement,con);
+				} catch (SQLException e) {
+					System.out.println(e.getMessage());
+				}
 			}
 		});
+	}
+	
+	public void saveCarsToDB() throws SQLException {
+		statement.execute("insert into car values('0','" + car_pane1.getCarModel().getSpeed() +"','"
+	+ car_pane1.getCarModel().getColor().toString() 
+	+ "','" + car_pane1.getCarModel().getRadius() +"')");
+		
+		statement.execute("insert into car values('1','" + car_pane2.getCarModel().getSpeed() +"','"
+				+ car_pane2.getCarModel().getColor().toString() 
+				+ "','" + car_pane2.getCarModel().getRadius() +"')");
+		
+		statement.execute("insert into car values('2','" + car_pane3.getCarModel().getSpeed() +"','"
+				+ car_pane3.getCarModel().getColor().toString() 
+				+ "','" + car_pane3.getCarModel().getRadius() +"')");
+		
+		statement.execute("insert into car values('3','" + car_pane4.getCarModel().getSpeed() +"','"
+				+ car_pane4.getCarModel().getColor().toString() 
+				+ "','" + car_pane4.getCarModel().getRadius() +"')");
+		
+		statement.execute("insert into car values('4','" + car_pane5.getCarModel().getSpeed() +"','"
+				+ car_pane5.getCarModel().getColor().toString() 
+				+ "','" + car_pane5.getCarModel().getRadius() +"')");
 	}
 
 	public void endRace() {

@@ -3,6 +3,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,8 +33,13 @@ public class Server extends Application{
 	private ArrayList <Model> modelList = new ArrayList<>();
 	private ArrayList <PacketToServer> gamblers = new ArrayList<>();
 	private int races = 0;
+	private Connection connection;
+	private Statement statement;
+	private Date dateOfRace;
+
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		startDB();
 		ta.setEditable(false);
 		Scene scene = new Scene(new ScrollPane(ta), 450, 200);
 		primaryStage.setTitle("CarServer"); // Set the stage title
@@ -65,6 +71,41 @@ public class Server extends Application{
 				ta.appendText(ex.getMessage());
 			}
 		}).start();
+	}
+
+	private void startDB() {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			connection = DriverManager.getConnection
+					("jdbc:mysql://localhost/carsRace", "scott", "tiger");
+
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					ta.appendText("Driver loaded\n");
+					ta.appendText("Database connected\n");			
+				}
+			});
+			
+			statement = connection.createStatement();
+			//createTables();
+		} catch (ClassNotFoundException | SQLException e) {
+			ta.appendText(e.getMessage());
+		}
+	}
+
+	private void createTables() throws SQLException {
+		statement.execute("create table Race(raceId char(5) not null, cars varchar(25) unique, dateOfRace date, totalAmount varchar(25), winCar varchar(25), "
+				+ "constraint pkRace primary key (raceId))");
+		
+		statement.execute("create table Gambler(gamblerId char(5) not null, raceId varchar(25) unique,"
+				+ " car1 varchar(25), car2 varchar(25), car3 varchar(25), car4 varchar(25), car5 varchar(25),"
+				+ " constraint pkGambler primary key (gamblerId),"
+				+ " constraint fkRaceId foreign key (raceId) references Race(raceId))");
+		
+		statement.execute("create table Car(carId char(5) not null, speed varchar(25), color varchar(25), wheelRadius varchar(25),"
+				+ " constraint pkCar primary key (carId))");
+				
 	}
 
 	class HandleRace implements Runnable
@@ -103,14 +144,17 @@ public class Server extends Application{
 						});
 					}else{
 						races++;
-						View view = new View();
+						View view = new View(statement,connection);
 						Model model = new Model(races);
 						Controller controller = new Controller(model, view);
 						view.setModel(model);
+						//view.saveCarsToDB();
 						modelList.add(model);
 						viewList.add(view);
 						controllerList.add(controller);
-
+						dateOfRace = new Date();
+						model.setDate(dateOfRace);
+						
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -134,16 +178,16 @@ public class Server extends Application{
 										});
 							}
 						});
-
+						
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
-								ta.appendText("New race " + races + " is opened on " + new Date() + "\n");
+								ta.appendText("New race " + races + " is opened on " + dateOfRace + "\n");
 							}
 						});
 					}
 				}
-			} catch (IOException | ClassNotFoundException e) {
+			} catch (IOException | ClassNotFoundException | SQLException e) {
 				ta.appendText(e.getMessage());
 				try {
 					serverSocket.close();
