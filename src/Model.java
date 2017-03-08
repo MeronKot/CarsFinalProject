@@ -12,7 +12,6 @@ import java.sql.Statement;
 import javafx.scene.paint.Color;
 public class Model
 { 
-	private CarLog log;
 	private int raceCounter;
 	private Date dateOfRace;
 	private Car c1;
@@ -27,14 +26,14 @@ public class Model
 	private double totalGamblingAmount = 0;
 	private HashMap<Integer, HashMap<Integer,Double>> gamblers;
 
-	public Model(int raceCounter){	
+	public Model(int raceCounter, int gamblerCount){	
 		this.raceCounter = raceCounter;
-		//this.log=new CarLog(this.raceCounter);
-		c1=new Car(0,raceCounter,log);
-		c2=new Car(1,raceCounter,log);
-		c3=new Car(2,raceCounter,log);
-		c4=new Car(3,raceCounter,log);
-		c5=new Car(4,raceCounter,log);
+		this.gamblerCounter = gamblerCount;
+		c1=new Car(0,raceCounter);
+		c2=new Car(1,raceCounter);
+		c3=new Car(2,raceCounter);
+		c4=new Car(3,raceCounter);
+		c5=new Car(4,raceCounter);
 		carsSpeed = new double [5];
 		gamblers = new HashMap<>();
 	}
@@ -131,8 +130,10 @@ public class Model
 		int i = 0;			
 		for(int j = 0 ; j < carsGambling.length ; j++){
 			if(carsGambling[j])
+			{
 				i++;
-			carsCompete += j + ",";
+				carsCompete += (j + 1) + ",";
+			}			
 		}
 		
 		if (i >= 3)
@@ -147,16 +148,31 @@ public class Model
 		pst.setString(2, carsCompete);
 		pst.setDate(3, new java.sql.Date(dateOfRace.getTime()));
 		pst.setString(4, String.valueOf(totalGamblingAmount));
-		pst.setString(5, String.valueOf(winCarIdx));
-		pst.executeUpdate();
-		/*
-		statement.execute("insert into race values('" + String.valueOf(raceCounter)
-		+ "','" + carsCompete + "'," + dateOfRace + ",'" + String.valueOf(totalGamblingAmount)
-		+ "','" + String.valueOf(winCarIdx) + "')");
-		*/		
+		pst.setString(5, String.valueOf(winCarIdx + 1));
+		pst.executeUpdate();	
+	}
+	
+	public void saveGamblersDB(Statement statement, Connection con) throws SQLException {
+		int idx = 1;
+		Iterator it = gamblers.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry pair = (Map.Entry)it.next();
+			PreparedStatement pst = con.prepareStatement("insert into gambler values(?,?,?,?,?,?,?)");
+			pst.setString(idx++, String.valueOf((Integer)pair.getKey() + 1));
+			pst.setString(idx++, String.valueOf(raceCounter));
+			HashMap<Integer, Double> amounts = (HashMap<Integer, Double>) pair.getValue();
+			Iterator itValue = amounts.entrySet().iterator();
+			while(itValue.hasNext()){
+				Map.Entry valuePair = (Map.Entry)itValue.next();
+				pst.setString((int)valuePair.getKey() + idx, String.valueOf(valuePair.getValue()));
+			}
+			pst.executeUpdate();
+			idx = 1;
+		}		
 	}
 
 	public void setDate(Date dateOfRace) {
 		this.dateOfRace = dateOfRace;
 	}
+	
 }

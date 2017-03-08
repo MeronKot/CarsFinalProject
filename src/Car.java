@@ -9,17 +9,15 @@ public class Car implements CarEvents
 { 
 	private int id;
 	private int model_id;
-	private CarLog log;
 	private double speed;
 	private Color color;
 	private int wheelRadius;
 	private Map<eventType, ArrayList<EventHandler<Event>>> carHashMap;
 
-	public Car(int id, int model_id, CarLog log)
+	public Car(int id, int model_id)
 	{	
 		this.id = id;
 		this.model_id = model_id;
-		this.log = log;
 		this.speed = 1;
 		this.color = Color.RED;
 		this.wheelRadius = 5;
@@ -85,7 +83,6 @@ public class Car implements CarEvents
 		msg = "CarRaceView" + (getModelId() + 1) + " | car number: "
 				+ (getId() + 1) + " | actionCommand: " + et.toString()
 				+ " | array size is: " + al.size();
-		//log.printMsg(msg);
 		for (int i = 0; i < al.size(); i++)
 		{ 
 			EventHandler<Event> handler = (EventHandler<Event>) al.get(i);

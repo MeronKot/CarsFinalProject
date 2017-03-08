@@ -25,6 +25,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.media.AudioClip;
 import javafx.scene.media.AudioSpectrumListener;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaMarkerEvent;
@@ -49,6 +50,7 @@ public class View implements Serializable
 	private Duration length;
 	private int times;
 	private Statement statement;
+	private Connection con;
 	
 	public View(Statement statement,Connection con) throws SQLException
 	{	
@@ -56,6 +58,7 @@ public class View implements Serializable
 		int High = 2;
 		Random rand = new Random();
 		this.statement = statement;
+		this.con = con;
 		
 		border_pane = new BorderPane();
 		//createDetailsGrid();
@@ -71,6 +74,7 @@ public class View implements Serializable
 				model.calculateWinners(length.toMinutes(),times);
 				try {
 					model.saveRaceDB(statement,con);
+					model.saveGamblersDB(statement,con);					
 				} catch (SQLException e) {
 					System.out.println(e.getMessage());
 				}
@@ -320,7 +324,7 @@ public class View implements Serializable
 		return slRadius;
 	}
 	
-	public void playSong(HashMap<Integer, Double> hashMap) {
+	public void playSong(HashMap<Integer, Double> hashMap) throws SQLException {
 		//mediaPlayer.play();
 		//length = mediaPlayer.getTotalDuration();
 		length = sound.getDuration();
@@ -337,6 +341,12 @@ public class View implements Serializable
 				randomSpeed(hashMap);				
 			}
 		});
-		mediaPlayer.play();
+		new Thread(){
+			@Override
+			public void run() {
+				mediaPlayer.play();
+			}
+		}.start();
+
 	}
 }

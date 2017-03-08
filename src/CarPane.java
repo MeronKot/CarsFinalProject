@@ -1,4 +1,3 @@
-import java.io.File;
 import java.util.Random;
 
 import javafx.animation.KeyFrame;
@@ -8,8 +7,6 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.layout.Pane;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;

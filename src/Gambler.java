@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javafx.application.Application;
@@ -25,11 +26,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.application.Platform;
 
 public class Gambler extends Application {
 
 	private final int MAX_CARS = 5;
-	private int availableRaces;
+	private ArrayList<Integer> availableRaces;
 	private Text [] cars = new Text[MAX_CARS];
 	private TextArea [] money = new TextArea[MAX_CARS];
 	private ObservableList<Integer> items = FXCollections.observableArrayList();
@@ -48,9 +50,8 @@ public class Gambler extends Application {
 			socket = new Socket("localhost", 8000);
 			toServer = new ObjectOutputStream(socket.getOutputStream());
 			fromServer = new ObjectInputStream(socket.getInputStream());
-			availableRaces = (int) fromServer.readObject();
+			availableRaces = (ArrayList<Integer>) fromServer.readObject();
 		}catch(IOException e){
-			System.out.println(e.getMessage());
 		}
 
 		BorderPane mainPane = new BorderPane();
@@ -74,6 +75,11 @@ public class Gambler extends Application {
 				{ 
 					public void handle(WindowEvent event)
 					{ 
+						try {
+							socket.close();
+						} catch (IOException e) {
+							System.out.println("i am here x");
+						}
 						primaryStage.close();
 					} 
 				});
@@ -87,9 +93,17 @@ public class Gambler extends Application {
 		//to do: get active races from server for gambler offers
 		races = new ListView<>();
 		races.setItems(items);
-		for(int i = 1 ; i <= availableRaces; i++)
-			items.add(i);
-		races.getSelectionModel().selectFirst();
+
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				for (Integer i : availableRaces)
+					items.add(i);
+				races.getSelectionModel().selectFirst();
+			};
+		});
+
+		//races.getSelectionModel().selectFirst();
 		races.setStyle("-fx-background-color: lightgrey");
 		races.setOrientation(Orientation.HORIZONTAL);
 		races.setPrefSize(100, 40);
@@ -123,23 +137,43 @@ public class Gambler extends Application {
 		go.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				if (availableRaces > 0){
+				if (availableRaces.size() > 0){
 					HashMap<Integer,Double> arr = new HashMap<>();
-					for (int i = 0 ; i < MAX_CARS ; i++)
-						if(!(money[i].getText().equals("")))
-							arr.put(i,Double.parseDouble(money[i].getText()));
 					try
 					{
+						for (int i = 0 ; i < MAX_CARS ; i++)
+							if(!(money[i].getText().equals("")))
+								arr.put(i,Double.parseDouble(money[i].getText()));
+							else{
+								arr.put(i,0.0);
+							}
+
 						raceId = races.getSelectionModel().getSelectedItem();
 						PacketToServer packet = new PacketToServer(arr,raceId);
 						toServer.writeObject(packet);
 						alert(AlertType.INFORMATION,"Goodluck");
+						try {
+							socket.close();
+						} catch (IOException e) {
+							System.out.println("i am here goodLuck");
+						}
 						currentStage.close();
-					}catch(IOException e){
-						System.out.println(e.getMessage());
+					}catch(IOException | NumberFormatException e){
+						alert(AlertType.ERROR,e.getMessage());
+						try {
+							socket.close();
+						} catch (IOException e1) {
+							System.out.println("i am here notGood");
+						}
+						currentStage.close();
 					}
 				}else{
 					alert(AlertType.ERROR,"No available races");
+					try {
+						socket.close();
+					} catch (IOException e1) {
+						System.out.println("i am here no races");
+					}
 					currentStage.close();
 				}
 			}

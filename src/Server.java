@@ -15,33 +15,60 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.chart.BubbleChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import sun.util.xml.PlatformXmlPropertiesProvider;
 
 public class Server extends Application{
 
-	private static TextArea ta = new TextArea();
+	private TextArea ta = new TextArea();
 	private ServerSocket serverSocket;
 	private Socket socket;
-	private ArrayList <View> viewList = new ArrayList<>();
-	private ArrayList <Controller> controllerList = new ArrayList<>();
-	private ArrayList <Model> modelList = new ArrayList<>();
+	private HashMap <Integer,View> viewList = new HashMap<>();
+	private HashMap <Integer,Controller> controllerList = new HashMap<>();
+	private HashMap <Integer,Model> modelList = new HashMap<>();
 	private ArrayList <PacketToServer> gamblers = new ArrayList<>();
 	private int races = 0;
+	private ArrayList<Integer> availableRaces = new ArrayList<>();
 	private Connection connection;
 	private Statement statement;
 	private Date dateOfRace;
+	private int gamblerCount = 0;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		startDB();
 		ta.setEditable(false);
-		Scene scene = new Scene(new ScrollPane(ta), 450, 200);
+		VBox pane = new VBox();
+		Button data = new Button("Data");
+		data.setPrefSize(450, 10);
+		data.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				Stage tableView = new Stage();
+				try {
+					new DataBaseView().start(tableView,connection);
+				} catch (Exception e) {
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							ta.appendText(e.getMessage() + '\n');
+						}
+					});
+				}
+			}
+		});
+		pane.getChildren().addAll(new ScrollPane(ta),data);
+		Scene scene = new Scene(pane, 450, 200);
 		primaryStage.setTitle("CarServer"); // Set the stage title
 		primaryStage.setScene(scene); // Place the scene in the stage
 		primaryStage.show(); // Display the stage
@@ -68,7 +95,12 @@ public class Server extends Application{
 					new Thread(new HandleRace(socket)).start();
 				}
 			}catch(IOException ex){
-				ta.appendText(ex.getMessage());
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						ta.appendText(ex.getMessage());
+					}
+				});				
 			}
 		}).start();
 	}
@@ -86,26 +118,41 @@ public class Server extends Application{
 					ta.appendText("Database connected\n");			
 				}
 			});
-			
+
 			statement = connection.createStatement();
 			//createTables();
+			ResultSet resRace = statement.executeQuery("select count(*) from race");
+			while (resRace.next()) {
+				races =  resRace.getInt(1);
+			}
+			
+			ResultSet resGamblers = statement.executeQuery("select count(*) from gambler");
+			while (resGamblers.next()) {
+				gamblerCount  =  resGamblers.getInt(1);
+			}
+			
 		} catch (ClassNotFoundException | SQLException e) {
-			ta.appendText(e.getMessage());
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					ta.appendText(e.getMessage());
+				}
+			});
 		}
 	}
 
 	private void createTables() throws SQLException {
-		statement.execute("create table Race(raceId char(5) not null, cars varchar(25) unique, dateOfRace date, totalAmount varchar(25), winCar varchar(25), "
+		statement.execute("create table Race(raceId char(5) not null, cars varchar(25), dateOfRace date, totalAmount varchar(25), winCar varchar(25), "
 				+ "constraint pkRace primary key (raceId))");
-		
+
 		statement.execute("create table Gambler(gamblerId char(5) not null, raceId varchar(25) unique,"
 				+ " car1 varchar(25), car2 varchar(25), car3 varchar(25), car4 varchar(25), car5 varchar(25),"
 				+ " constraint pkGambler primary key (gamblerId),"
 				+ " constraint fkRaceId foreign key (raceId) references Race(raceId))");
-		
+
 		statement.execute("create table Car(carId char(5) not null, speed varchar(25), color varchar(25), wheelRadius varchar(25),"
 				+ " constraint pkCar primary key (carId))");
-				
+
 	}
 
 	class HandleRace implements Runnable
@@ -123,7 +170,7 @@ public class Server extends Application{
 				ObjectOutputStream outputToClient = new ObjectOutputStream(socket.getOutputStream());
 
 				//first send to client the available races for list view 
-				outputToClient.writeObject(races);
+				outputToClient.writeObject(availableRaces);
 				while (true){
 					PacketToServer packet = (PacketToServer)inputFromClient.readObject();
 					if(packet.gamblerClient()){
@@ -142,19 +189,21 @@ public class Server extends Application{
 								}
 							}
 						});
+						break;
 					}else{
 						races++;
+						availableRaces.add(races);
 						View view = new View(statement,connection);
-						Model model = new Model(races);
+						Model model = new Model(races,gamblerCount);
 						Controller controller = new Controller(model, view);
 						view.setModel(model);
 						//view.saveCarsToDB();
-						modelList.add(model);
-						viewList.add(view);
-						controllerList.add(controller);
+						modelList.put(races - 1, model);
+						viewList.put(races - 1,view);
+						controllerList.put(races - 1,controller);
 						dateOfRace = new Date();
 						model.setDate(dateOfRace);
-						
+
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -178,7 +227,7 @@ public class Server extends Application{
 										});
 							}
 						});
-						
+
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -187,13 +236,28 @@ public class Server extends Application{
 						});
 					}
 				}
-			} catch (IOException | ClassNotFoundException | SQLException e) {
-				ta.appendText(e.getMessage());
+			} catch (IOException | ClassNotFoundException | SQLException | NullPointerException e) {
+				Platform.runLater(new Runnable() {
+
+					@Override
+					public void run() {
+						System.out.println("i am here");
+						ta.appendText(e.getMessage());						
+					}
+				});
+
 				try {
 					serverSocket.close();
 					socket.close();
 				} catch (IOException e1) {
-					ta.appendText(e1.getMessage());
+					Platform.runLater(new Runnable() {
+
+						@Override
+						public void run() {
+							ta.appendText(e1.getMessage());			
+						}
+					});
+
 				}
 			}
 
@@ -210,7 +274,18 @@ public class Server extends Application{
 		int High = 50;
 
 		modelOfCurrentRace.setGambler(packet.getGamblerAmounts());
-		if(packet.getGamblerAmounts().size() >= 3)
-			viewOfCurrentRace.playSong(packet.getGamblerAmounts());
+		if(modelOfCurrentRace.checkIfRaceReady())
+		{
+			try {
+				viewOfCurrentRace.playSong(packet.getGamblerAmounts());
+			} catch (SQLException e) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						ta.appendText(e.getSQLState());						
+					}
+				});
+			}
+		}
 	}
 }

@@ -73,16 +73,6 @@ public class CarRaceMVC extends Application
 					Stage server = new Stage();
 					new Server().start(server);
 					isServerOn = true;
-					
-					//open connection to server to send the gambling
-					try
-					{
-						socket = new Socket("localhost", 8000);
-						toServer = new ObjectOutputStream(socket.getOutputStream());
-						fromServer = new ObjectInputStream(socket.getInputStream());
-					}catch(IOException e){
-						System.out.println(e.getMessage());
-					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -96,8 +86,20 @@ public class CarRaceMVC extends Application
 			public void handle(ActionEvent event)
 		{	
 			if(isServerOn)
+			{
+				
+				//open connection to server to send the race and then gambler
+				try
+				{
+					socket = new Socket("localhost", 8000);
+					toServer = new ObjectOutputStream(socket.getOutputStream());
+					fromServer = new ObjectInputStream(socket.getInputStream());
+				}catch(IOException e){
+					System.out.println(e.getMessage());
+				}
+			
 				createNewWindow();
-			else{
+			}else{
 				alert(AlertType.ERROR, "You should run the server first");
 			}
 		}
