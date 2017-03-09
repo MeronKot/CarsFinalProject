@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javafx.application.Application;
@@ -139,6 +140,31 @@ public class CarRaceMVC extends Application
 		{
 			GamblerDetailsToServer packet = new GamblerDetailsToServer();
 			toServer.writeObject(packet);
+			try {
+				ArrayList<Integer> available = (ArrayList<Integer>) fromServer.readObject();
+				PacketToClient input = (PacketToClient) fromServer.readObject();
+				View view = new View();
+				view.setModel(input.getGamModel());
+				Stage race = new Stage();
+				Scene scene = new Scene(view.getBorderPane(),750,500);
+				view.createAllTimelines();
+				race.setScene(scene);
+				race.show();
+				scene.widthProperty().addListener(
+						new ChangeListener<Number>()
+						{ @Override
+							public void changed(
+									ObservableValue<? extends Number> observable,
+									Number oldValue, Number newValue)
+						{	// TODO Auto-generated method stub
+							view.setCarPanesMaxWidth(newValue.doubleValue());
+						}
+						});
+				System.out.println(input.getRaces());
+			} catch (ClassNotFoundException | SQLException e) {
+				// TODO Auto-generated catch block
+				System.out.println(e.getStackTrace());
+			}
 		}catch(IOException e){
 			System.out.println(e.getMessage());
 		}

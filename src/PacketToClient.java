@@ -11,16 +11,14 @@ public class PacketToClient implements Serializable
 	 */
 	private static final long serialVersionUID = 1L;
 	private Model gamModel;
-	private Statement statement;
-	private Connection con;
+	//private Connection con;
 	private int races;
 	
 	
 	
-	public PacketToClient(Statement statement, Connection con, Model model, int races)
+	public PacketToClient(Connection con, Model model, int races)
 	{
-		this.statement = statement;
-		this.con = con;
+		//this.con = con;
 		this.gamModel = model;
 		this.races = races;
 	}
@@ -40,15 +38,7 @@ public class PacketToClient implements Serializable
 	public void setGamModel(Model gamModel) {
 		this.gamModel = gamModel;
 	}
-
-	public Statement getStatement() {
-		return statement;
-	}
-
-	public void setStatement(Statement statement) {
-		this.statement = statement;
-	}
-
+/*
 	public Connection getCon() {
 		return con;
 	}
@@ -56,5 +46,5 @@ public class PacketToClient implements Serializable
 	public void setCon(Connection con) {
 		this.con = con;
 	}
-
+*/
 }

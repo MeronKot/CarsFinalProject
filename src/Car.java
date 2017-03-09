@@ -11,16 +11,16 @@ public class Car implements CarEvents,Serializable
 	private int id;
 	private int model_id;
 	private double speed;
-	private Color color;
+	//private Color color;
 	private int wheelRadius;
 	private Map<eventType, ArrayList<EventHandler<Event>>> carHashMap;
-
+	
 	public Car(int id, int model_id)
 	{	
 		this.id = id;
 		this.model_id = model_id;
 		this.speed = 1;
-		this.color = Color.RED;
+		//this.color = Color.RED;
 		this.wheelRadius = 5;
 		carHashMap = new HashMap<eventType, ArrayList<EventHandler<Event>>>();
 		for (eventType et : eventType.values())
@@ -29,22 +29,27 @@ public class Car implements CarEvents,Serializable
 	public int getId()
 	{	return id;
 	}
+	
 	public int getModelId()
 	{	return model_id;
 	}
+/*
 	public Color getColor()
 	{	return color;
 	}
+*/
 	public int getRadius()
 	{	return wheelRadius;
 	}
 	public double getSpeed()
 	{	return speed;
 	}
+/*
 	public void setColor(Color color)
 	{	this.color = color;
 	processEvent(eventType.COLOR, new ActionEvent());
 	}
+*/
 	public void setSpeed(double speed)
 	{	this.speed = speed;
 	processEvent(eventType.SPEED, new ActionEvent());
@@ -53,6 +58,7 @@ public class Car implements CarEvents,Serializable
 	{	this.wheelRadius = wheelRadius;
 	processEvent(eventType.RADIUS, new ActionEvent());
 	}
+	
 	public synchronized void addEventHandler(EventHandler<Event> l, eventType et)
 	{	
 		ArrayList<EventHandler<Event>> al;
@@ -62,7 +68,7 @@ public class Car implements CarEvents,Serializable
 		al.add(l);
 		carHashMap.put(et, al);
 	}
-	
+
 	public synchronized void removeEventHandler(EventHandler<Event> l, eventType et)
 	{	
 		ArrayList<EventHandler<Event>> al;
@@ -71,7 +77,7 @@ public class Car implements CarEvents,Serializable
 			al.remove(l);
 		carHashMap.put(et, al);
 	}
-	
+
 	private void processEvent(eventType et, Event e)
 	{	
 		String msg;

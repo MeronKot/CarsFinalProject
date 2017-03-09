@@ -193,7 +193,7 @@ public class Server extends Application{
 						races++;
 						availableRaces.add(races);
 						Model model = new Model(races,gamblerCount);
-						packetToClient = new PacketToClient(statement,connection,model,races);
+						packetToClient = new PacketToClient(connection,model,races);
 						outputToClient.writeObject(packetToClient);
 						Controller controller = new Controller(model);
 						//view.saveCarsToDB();
@@ -201,14 +201,14 @@ public class Server extends Application{
 						controllerList.put(races - 1,controller);
 						dateOfRace = new Date();
 						model.setDate(dateOfRace);
-
+/*
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
 								Stage stg = new Stage();
 								Scene scene = new Scene(packet.getgView().getBorderPane(), 750, 500);
 								controller.setOwnerStage(stg);
-								packet.getgView().createAllTimelines();
+								//packet.getgView().createAllTimelines();
 								stg.setScene(scene);
 								stg.setTitle("CarRaceView" + races);
 								stg.setAlwaysOnTop(true);
@@ -220,12 +220,12 @@ public class Server extends Application{
 													ObservableValue<? extends Number> observable,
 													Number oldValue, Number newValue)
 										{	// TODO Auto-generated method stub
-											packet.getgView().setCarPanesMaxWidth(newValue.doubleValue());
+											//packet.getgView().setCarPanesMaxWidth(newValue.doubleValue());
 										}
 										});
 							}
 						});
-
+*/
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -238,8 +238,7 @@ public class Server extends Application{
 				Platform.runLater(new Runnable() {
 
 					@Override
-					public void run() {
-						System.out.println("i am here");
+					public void run() {	
 						ta.appendText(e.getMessage());						
 					}
 				});

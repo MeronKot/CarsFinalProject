@@ -46,7 +46,6 @@ public class Gambler extends Application {
 	private View view;
 	private HashMap <Integer,View> viewList = new HashMap<>();
 	private PacketToClient recivedPacket;
-	private Statement state;
 	private Connection con;
 	private Model model;
 	private int pRaces;
@@ -64,11 +63,10 @@ public class Gambler extends Application {
 			availableRaces = (ArrayList<Integer>)fromServer.readObject();
 			
 			recivedPacket = (PacketToClient)fromServer.readObject();
-			state = recivedPacket.getStatement();
-			con = recivedPacket.getCon();
+			//con = recivedPacket.getCon();
 			model = recivedPacket.getGamModel();
 			pRaces = recivedPacket.getRaces();
-			view = new View(state,con);
+			view = new View();// talk about this!!
 			view.setModel(model);
 			viewList.put(pRaces - 1,view);
 			

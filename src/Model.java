@@ -14,6 +14,10 @@ import java.sql.Statement;
 
 public class Model implements Serializable
 { 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int raceCounter;
 	private Date dateOfRace;
 	private Car c1;
@@ -47,12 +51,12 @@ public class Model implements Serializable
 
 	public void changeRadius(int id,int radius)
 	{ 
-		getCarById(id).setRadius(radius);
+		//getCarById(id).setRadius(radius);
 	}
 
 	public void changeSpeed(int id,double speed)
 	{	
-		getCarById(id).setSpeed(speed);
+		//getCarById(id).setSpeed(speed);
 		carsSpeed[id] += speed;
 	}
 
@@ -143,7 +147,7 @@ public class Model implements Serializable
 		else return false;
 	}
 
-	public void saveRaceDB(Statement statement,Connection con) throws SQLException {
+	public void saveRaceDB(Connection con) throws SQLException {
 		//totalGamblingAmount and carsCompete are null
 		PreparedStatement pst = con.prepareStatement("insert into race values(?,?,?,?,?)");
 		pst.setString(1, String.valueOf(raceCounter));
@@ -154,7 +158,7 @@ public class Model implements Serializable
 		pst.executeUpdate();	
 	}
 	
-	public void saveGamblersDB(Statement statement, Connection con) throws SQLException {
+	public void saveGamblersDB(Connection con) throws SQLException {
 		int idx = 1;
 		Iterator it = gamblers.entrySet().iterator();
 		while(it.hasNext()){

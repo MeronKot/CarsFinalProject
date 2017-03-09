@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,17 +50,15 @@ public class View implements Serializable
 	private MediaPlayer mediaPlayer;
 	private Duration length;
 	private int times;
-	private Statement statement;
 	private Connection con;
 	
-	public View(Statement statement,Connection con) throws SQLException
+	public View(/*Connection con*/) throws SQLException
 	{	
 		int Low = 0;
 		int High = 2;
 		Random rand = new Random();
-		this.statement = statement;
-		this.con = con;
-		
+		this.con = DriverManager.getConnection
+				("jdbc:mysql://localhost/carsRace", "scott", "tiger");
 		border_pane = new BorderPane();
 		//createDetailsGrid();
 		//border_pane.setTop(details_grid);
@@ -73,15 +72,15 @@ public class View implements Serializable
 				endRace();
 				model.calculateWinners(length.toMinutes(),times);
 				try {
-					model.saveRaceDB(statement,con);
-					model.saveGamblersDB(statement,con);					
+					model.saveRaceDB(con);
+					model.saveGamblersDB(con);					
 				} catch (SQLException e) {
 					System.out.println(e.getMessage());
 				}
 			}
 		});
 	}
-	
+	/*
 	public void saveCarsToDB() throws SQLException {
 		statement.execute("insert into car values('0','" + car_pane1.getCarModel().getSpeed() +"','"
 	+ car_pane1.getCarModel().getColor().toString() 
@@ -103,7 +102,7 @@ public class View implements Serializable
 				+ car_pane5.getCarModel().getColor().toString() 
 				+ "','" + car_pane5.getCarModel().getRadius() +"')");
 	}
-
+*/
 	public void endRace() {
 		car_pane1.getTimeline().pause();
 		car_pane2.getTimeline().pause();

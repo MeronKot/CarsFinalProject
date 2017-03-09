@@ -22,7 +22,6 @@ public class GamblerDetailsToServer implements Serializable{
 		this.gViewList = gViewList;
 		this.gView = view; 
 		gamblerClient = true;
-		
 	}
 	
 	public HashMap<Integer, View> getgViewList() {
@@ -37,6 +36,7 @@ public class GamblerDetailsToServer implements Serializable{
 		return gView;
 	}
 
+	
 	public void setgView(View gView) {
 		this.gView = gView;
 	}

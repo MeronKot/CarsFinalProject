@@ -18,7 +18,7 @@ public class CarPane extends Pane implements CarEvents
 		@Override
 		public void handle(Event event)
 		{	
-			setColor(car.getColor());
+			//setColor(car.getColor());
 		}
 	}
 
@@ -68,7 +68,7 @@ public class CarPane extends Pane implements CarEvents
 	public void setCarModel(Car myCar)
 	{	
 		car = myCar;
-		car.setColor(color);
+		//car.setColor(color);
 		if (car != null)
 		{ 
 			car.addEventHandler(new ColorEvent(), eventType.COLOR);
