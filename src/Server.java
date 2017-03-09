@@ -33,16 +33,16 @@ public class Server extends Application{
 	private TextArea ta = new TextArea();
 	private ServerSocket serverSocket;
 	private Socket socket;
-	private HashMap <Integer,View> viewList = new HashMap<>();
 	private HashMap <Integer,Controller> controllerList = new HashMap<>();
 	private HashMap <Integer,Model> modelList = new HashMap<>();
-	private ArrayList <PacketToServer> gamblers = new ArrayList<>();
+	private ArrayList <GamblerDetailsToServer> gamblers = new ArrayList<>();
 	private int races = 0;
 	private ArrayList<Integer> availableRaces = new ArrayList<>();
 	private Connection connection;
 	private Statement statement;
 	private Date dateOfRace;
 	private int gamblerCount = 0;
+	private PacketToClient packetToClient;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -172,10 +172,9 @@ public class Server extends Application{
 				//first send to client the available races for list view 
 				outputToClient.writeObject(availableRaces);
 				while (true){
-					PacketToServer packet = (PacketToServer)inputFromClient.readObject();
+					GamblerDetailsToServer packet = (GamblerDetailsToServer)inputFromClient.readObject();
 					if(packet.gamblerClient()){
 						gamblers.add(packet);
-						//modelList.get(packet.getRaceId() - 1).setGambler(packet.getGamblerAmounts());
 						checkAndStartRace(packet);
 						Platform.runLater(new Runnable() {
 							@Override
@@ -193,13 +192,12 @@ public class Server extends Application{
 					}else{
 						races++;
 						availableRaces.add(races);
-						View view = new View(statement,connection);
 						Model model = new Model(races,gamblerCount);
-						Controller controller = new Controller(model, view);
-						view.setModel(model);
+						packetToClient = new PacketToClient(statement,connection,model,races);
+						outputToClient.writeObject(packetToClient);
+						Controller controller = new Controller(model);
 						//view.saveCarsToDB();
 						modelList.put(races - 1, model);
-						viewList.put(races - 1,view);
 						controllerList.put(races - 1,controller);
 						dateOfRace = new Date();
 						model.setDate(dateOfRace);
@@ -208,9 +206,9 @@ public class Server extends Application{
 							@Override
 							public void run() {
 								Stage stg = new Stage();
-								Scene scene = new Scene(view.getBorderPane(), 750, 500);
+								Scene scene = new Scene(packet.getgView().getBorderPane(), 750, 500);
 								controller.setOwnerStage(stg);
-								view.createAllTimelines();
+								packet.getgView().createAllTimelines();
 								stg.setScene(scene);
 								stg.setTitle("CarRaceView" + races);
 								stg.setAlwaysOnTop(true);
@@ -222,7 +220,7 @@ public class Server extends Application{
 													ObservableValue<? extends Number> observable,
 													Number oldValue, Number newValue)
 										{	// TODO Auto-generated method stub
-											view.setCarPanesMaxWidth(newValue.doubleValue());
+											packet.getgView().setCarPanesMaxWidth(newValue.doubleValue());
 										}
 										});
 							}
@@ -236,7 +234,7 @@ public class Server extends Application{
 						});
 					}
 				}
-			} catch (IOException | ClassNotFoundException | SQLException | NullPointerException e) {
+			} catch (IOException | ClassNotFoundException | NullPointerException e) {
 				Platform.runLater(new Runnable() {
 
 					@Override
@@ -265,10 +263,10 @@ public class Server extends Application{
 
 	}
 
-	public void checkAndStartRace(PacketToServer packet) {
+	public void checkAndStartRace(GamblerDetailsToServer packet) {
 		int raceId = packet.getRaceId();
 		Model modelOfCurrentRace = modelList.get(raceId - 1);
-		View viewOfCurrentRace = viewList.get(raceId - 1);
+		View viewOfCurrentRace = packet.getgViewList().get(raceId - 1);
 		Random rand = new Random();
 		int Low = 1;
 		int High = 50;

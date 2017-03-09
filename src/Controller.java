@@ -17,28 +17,18 @@ public class Controller implements CarEvents
 	private final int CAR5_ID = 4;
 	private Stage stg;
 	private Model model;
-	private View view;
 	private Color colors[] = { Color.RED, Color.AQUA, Color.BLUE, Color.GREEN,
 			Color.YELLOW, Color.ORANGE, Color.PINK, Color.VIOLET, 
 			Color.WHITE, Color.TRANSPARENT
 	};
 	
-	public Controller(Model model, View view)
+	public Controller(Model model)
 	{	
 		this.model = model;
-		this.view = view;
 
 		//change all this to random, not input from user
 	}
 	
-	public void changeColorView()
-	{ 
-		int car_index = view.getItemsCar().indexOf(
-				view.getCarIdComBox().getValue());
-		int color_index = view.getItemsColor().indexOf(
-				view.getColorComBox().getValue());
-		model.changeColor(car_index, colors[color_index]);
-	}
 
 	public void setOwnerStage(Stage stg)
 	{ 

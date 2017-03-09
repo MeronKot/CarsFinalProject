@@ -60,9 +60,9 @@ public class CarRaceMVC extends Application
 		}
 		}
 		});
-		controllerList = new ArrayList<Controller>();
-		viewList = new ArrayList<View>();
-		modelList = new ArrayList<Model>();
+		//controllerList = new ArrayList<Controller>();
+		//viewList = new ArrayList<View>();
+		//modelList = new ArrayList<Model>();
 		
 		//button to start the multi thread server. must be the first click.
 		//create separate thread to each race.
@@ -135,42 +135,13 @@ public class CarRaceMVC extends Application
 
 	public void createNewWindow()
 	{	
-		//Model model = new Model(raceCounter);
-		//View view = new View();
-		
 		try
 		{
-			PacketToServer packet = new PacketToServer();
+			GamblerDetailsToServer packet = new GamblerDetailsToServer();
 			toServer.writeObject(packet);
 		}catch(IOException e){
 			System.out.println(e.getMessage());
 		}
-		/*
-		//Controller controller = new Controller(model, view);
-		//view.setModel(model);
-		//modelList.add(model);
-		//viewList.add(view);
-		//controllerList.add(controller);
-		Stage stg = new Stage();
-		Scene scene = new Scene(view.getBorderPane(), 750, 500);
-		//controller.setOwnerStage(stg);
-		//view.createAllTimelines();
-		stg.setScene(scene);
-		raceCounter++;
-		stg.setTitle("CarRaceView" + raceCounter);
-		stg.setAlwaysOnTop(true);
-		stg.show();
-		scene.widthProperty().addListener(
-				new ChangeListener<Number>()
-				{ @Override
-					public void changed(
-							ObservableValue<? extends Number> observable,
-							Number oldValue, Number newValue)
-				{	// TODO Auto-generated method stub
-					//view.setCarPanesMaxWidth(newValue.doubleValue());
-				}
-				});
-				*/
 	}
 	
 	public void alert(AlertType type,String msg)

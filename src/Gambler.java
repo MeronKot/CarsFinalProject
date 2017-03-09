@@ -2,6 +2,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -41,6 +43,15 @@ public class Gambler extends Application {
 	private ObjectInputStream fromServer;
 	private Stage currentStage;
 	private int raceId;
+	private View view;
+	private HashMap <Integer,View> viewList = new HashMap<>();
+	private PacketToClient recivedPacket;
+	private Statement state;
+	private Connection con;
+	private Model model;
+	private int pRaces;
+	
+
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
@@ -50,7 +61,18 @@ public class Gambler extends Application {
 			socket = new Socket("localhost", 8000);
 			toServer = new ObjectOutputStream(socket.getOutputStream());
 			fromServer = new ObjectInputStream(socket.getInputStream());
-			availableRaces = (ArrayList<Integer>) fromServer.readObject();
+			availableRaces = (ArrayList<Integer>)fromServer.readObject();
+			
+			recivedPacket = (PacketToClient)fromServer.readObject();
+			state = recivedPacket.getStatement();
+			con = recivedPacket.getCon();
+			model = recivedPacket.getGamModel();
+			pRaces = recivedPacket.getRaces();
+			view = new View(state,con);
+			view.setModel(model);
+			viewList.put(pRaces - 1,view);
+			
+
 		}catch(IOException e){
 		}
 
@@ -149,7 +171,7 @@ public class Gambler extends Application {
 							}
 
 						raceId = races.getSelectionModel().getSelectedItem();
-						PacketToServer packet = new PacketToServer(arr,raceId);
+						GamblerDetailsToServer packet = new GamblerDetailsToServer(arr,raceId,view,viewList);
 						toServer.writeObject(packet);
 						alert(AlertType.INFORMATION,"Goodluck");
 						try {

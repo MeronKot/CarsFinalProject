@@ -1,4 +1,5 @@
 import java.awt.image.ColorModel;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -9,8 +10,9 @@ import java.util.Map;
 
 import java.sql.Statement;
 
-import javafx.scene.paint.Color;
-public class Model
+//import javafx.scene.paint.Color;
+
+public class Model implements Serializable
 { 
 	private int raceCounter;
 	private Date dateOfRace;
@@ -38,9 +40,9 @@ public class Model
 		gamblers = new HashMap<>();
 	}
 
-	public void changeColor(int id,Color color)
+	public void changeColor(int id,String color)
 	{	
-		getCarById(id).setColor(color);
+		//getCarById(id).setColor(color);
 	}
 
 	public void changeRadius(int id,int radius)
@@ -171,6 +173,11 @@ public class Model
 		}		
 	}
 
+	
+	
+	
+	
+	
 	public void setDate(Date dateOfRace) {
 		this.dateOfRace = dateOfRace;
 	}

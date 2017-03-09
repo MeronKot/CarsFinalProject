@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -5,7 +6,7 @@ import javafx.event.Event;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.paint.Color;
-public class Car implements CarEvents
+public class Car implements CarEvents,Serializable
 { 
 	private int id;
 	private int model_id;
