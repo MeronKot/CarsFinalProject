@@ -125,12 +125,12 @@ public class Server extends Application{
 			while (resRace.next()) {
 				races =  resRace.getInt(1);
 			}
-			
+
 			ResultSet resGamblers = statement.executeQuery("select count(*) from gambler");
 			while (resGamblers.next()) {
 				gamblerCount  =  resGamblers.getInt(1);
 			}
-			
+
 		} catch (ClassNotFoundException | SQLException e) {
 			Platform.runLater(new Runnable() {
 				@Override
@@ -175,7 +175,7 @@ public class Server extends Application{
 					GamblerDetailsToServer packet = (GamblerDetailsToServer)inputFromClient.readObject();
 					if(packet.gamblerClient()){
 						gamblers.add(packet);
-						checkAndStartRace(packet);
+						checkAndStartRace(packet,outputToClient);
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -195,13 +195,13 @@ public class Server extends Application{
 						Model model = new Model(races,gamblerCount);
 						packetToClient = new PacketToClient(connection,model,races);
 						outputToClient.writeObject(packetToClient);
-						Controller controller = new Controller(model);
+						//Controller controller = new Controller(model);
 						//view.saveCarsToDB();
 						modelList.put(races - 1, model);
-						controllerList.put(races - 1,controller);
+						//controllerList.put(races - 1,controller);
 						dateOfRace = new Date();
 						model.setDate(dateOfRace);
-/*
+						/*
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -225,7 +225,7 @@ public class Server extends Application{
 										});
 							}
 						});
-*/
+						 */
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -262,10 +262,10 @@ public class Server extends Application{
 
 	}
 
-	public void checkAndStartRace(GamblerDetailsToServer packet) {
+	public void checkAndStartRace(GamblerDetailsToServer packet, ObjectOutputStream outputToClient) {
 		int raceId = packet.getRaceId();
 		Model modelOfCurrentRace = modelList.get(raceId - 1);
-		View viewOfCurrentRace = packet.getgViewList().get(raceId - 1);
+		//View viewOfCurrentRace = packet.getgViewList().get(raceId - 1);
 		Random rand = new Random();
 		int Low = 1;
 		int High = 50;
@@ -274,15 +274,17 @@ public class Server extends Application{
 		if(modelOfCurrentRace.checkIfRaceReady())
 		{
 			try {
-				viewOfCurrentRace.playSong(packet.getGamblerAmounts());
-			} catch (SQLException e) {
+				PacketToClient play = new PacketToClient(true,packet.getGamblerAmounts());
+				outputToClient.writeObject(packet);
+			} catch (IOException e) {
 				Platform.runLater(new Runnable() {
 					@Override
 					public void run() {
-						ta.appendText(e.getSQLState());						
+						ta.appendText(e.getMessage());						
 					}
 				});
 			}
+			//viewOfCurrentRace.playSong(packet.getGamblerAmounts());
 		}
 	}
 }

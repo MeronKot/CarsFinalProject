@@ -17,12 +17,13 @@ public class Controller implements CarEvents
 	private final int CAR5_ID = 4;
 	private Stage stg;
 	private Model model;
+	private View view;
 	private Color colors[] = { Color.RED, Color.AQUA, Color.BLUE, Color.GREEN,
 			Color.YELLOW, Color.ORANGE, Color.PINK, Color.VIOLET, 
 			Color.WHITE, Color.TRANSPARENT
 	};
 	
-	public Controller(Model model)
+	public Controller(Model model, View view)
 	{	
 		this.model = model;
 

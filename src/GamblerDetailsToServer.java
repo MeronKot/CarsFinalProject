@@ -16,11 +16,9 @@ public class GamblerDetailsToServer implements Serializable{
 	public GamblerDetailsToServer(){
 	}
 	
-	public GamblerDetailsToServer(HashMap<Integer,Double> gamblerAmounts, int raceId,View view,HashMap <Integer,View> gViewList){
+	public GamblerDetailsToServer(HashMap<Integer,Double> gamblerAmounts, int raceId){
 		this.raceId = raceId;
 		this.gamblerAmounts = gamblerAmounts;
-		this.gViewList = gViewList;
-		this.gView = view; 
 		gamblerClient = true;
 	}
 	

@@ -2,6 +2,7 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class PacketToClient implements Serializable
@@ -13,14 +14,39 @@ public class PacketToClient implements Serializable
 	private Model gamModel;
 	//private Connection con;
 	private int races;
+	private boolean play = false;
+	private HashMap<Integer, Double> hashMap;
 	
 	
-	
+
+
 	public PacketToClient(Connection con, Model model, int races)
 	{
 		//this.con = con;
 		this.gamModel = model;
 		this.races = races;
+	}
+	
+	public PacketToClient(boolean play, HashMap<Integer, Double> hashMap){
+		this.play = play;
+		this.hashMap = hashMap;
+	}
+
+
+	public HashMap<Integer, Double> getHashMap() {
+		return hashMap;
+	}
+
+	public void setHashMap(HashMap<Integer, Double> hashMap) {
+		this.hashMap = hashMap;
+	}
+	
+	public boolean isPlay() {
+		return play;
+	}
+
+	public void setPlay(boolean play) {
+		this.play = play;
 	}
 
 	public int getRaces() {

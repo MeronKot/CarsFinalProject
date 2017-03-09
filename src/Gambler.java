@@ -61,7 +61,7 @@ public class Gambler extends Application {
 			toServer = new ObjectOutputStream(socket.getOutputStream());
 			fromServer = new ObjectInputStream(socket.getInputStream());
 			availableRaces = (ArrayList<Integer>)fromServer.readObject();
-			
+			/*
 			recivedPacket = (PacketToClient)fromServer.readObject();
 			//con = recivedPacket.getCon();
 			model = recivedPacket.getGamModel();
@@ -69,7 +69,7 @@ public class Gambler extends Application {
 			view = new View();// talk about this!!
 			view.setModel(model);
 			viewList.put(pRaces - 1,view);
-			
+			*/
 
 		}catch(IOException e){
 		}
@@ -169,7 +169,7 @@ public class Gambler extends Application {
 							}
 
 						raceId = races.getSelectionModel().getSelectedItem();
-						GamblerDetailsToServer packet = new GamblerDetailsToServer(arr,raceId,view,viewList);
+						GamblerDetailsToServer packet = new GamblerDetailsToServer(arr,raceId);
 						toServer.writeObject(packet);
 						alert(AlertType.INFORMATION,"Goodluck");
 						try {

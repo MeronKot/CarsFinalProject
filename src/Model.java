@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javafx.scene.paint.Color;
+
 import java.sql.Statement;
 
 //import javafx.scene.paint.Color;
@@ -44,14 +46,14 @@ public class Model implements Serializable
 		gamblers = new HashMap<>();
 	}
 
-	public void changeColor(int id,String color)
+	public void changeColor(int id,Color color)
 	{	
 		//getCarById(id).setColor(color);
 	}
 
 	public void changeRadius(int id,int radius)
 	{ 
-		//getCarById(id).setRadius(radius);
+		getCarById(id).setRadius(radius);
 	}
 
 	public void changeSpeed(int id,double speed)
