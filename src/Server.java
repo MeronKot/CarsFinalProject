@@ -49,8 +49,10 @@ public class Server extends Application{
 		startDB();
 		ta.setEditable(false);
 		VBox pane = new VBox();
-		Button data = new Button("Data");
+		Button data = new Button("Current Data");
+		Button stat = new Button("Statistics");
 		data.setPrefSize(450, 10);
+		stat.setPrefSize(450, 10);
 		data.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -67,7 +69,25 @@ public class Server extends Application{
 				}
 			}
 		});
-		pane.getChildren().addAll(new ScrollPane(ta),data);
+		
+		stat.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				Stage tableView = new Stage();
+				try {
+					new StatisticsView().start(tableView,connection);
+				} catch (Exception e) {
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							ta.appendText(e.getMessage() + '\n');
+						}
+					});
+				}
+			}
+		});
+		
+		pane.getChildren().addAll(new ScrollPane(ta),data,stat);
 		Scene scene = new Scene(pane, 450, 200);
 		primaryStage.setTitle("CarServer"); // Set the stage title
 		primaryStage.setScene(scene); // Place the scene in the stage
@@ -142,7 +162,7 @@ public class Server extends Application{
 	}
 
 	private void createTables() throws SQLException {
-		statement.execute("create table Race(raceId char(5) not null, cars varchar(25), dateOfRace date, totalAmount varchar(25), winCar varchar(25), "
+		statement.execute("create table Race(raceId char(5) not null, cars varchar(25), dateOfRace date, totalAmount varchar(25), winCar varchar(25), systemCash varchar(25), "
 				+ "constraint pkRace primary key (raceId))");
 
 		statement.execute("create table Gambler(gamblerId char(5) not null, raceId varchar(25) unique,"
@@ -152,6 +172,9 @@ public class Server extends Application{
 
 		statement.execute("create table Car(carId char(5) not null, speed varchar(25), color varchar(25), wheelRadius varchar(25),"
 				+ " constraint pkCar primary key (carId))");
+	
+		statement.execute("create table System(sysId char(5) not null, cash varchar(25)," 
+						+ "constraint pkCar primary key (sysId))");
 
 	}
 
