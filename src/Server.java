@@ -272,7 +272,7 @@ public class Server extends Application{
 
 		modelOfCurrentRace.setGambler(packet.getGamblerAmounts());
 		if(modelOfCurrentRace.checkIfRaceReady())
-		{/*
+		{
 			try {
 				PacketToClient play = new PacketToClient(true,packet.getGamblerAmounts());
 				outputToClient.writeObject(play);
@@ -285,9 +285,9 @@ public class Server extends Application{
 				});
 			}
 			//viewOfCurrentRace.playSong(packet.getGamblerAmounts());
-			 * 
-			 */
-			modelOfCurrentRace.playSong(packet.getGamblerAmounts());
+			  
+			 
+			//modelOfCurrentRace.playSong(packet.getGamblerAmounts());
 		}
 	}
 }

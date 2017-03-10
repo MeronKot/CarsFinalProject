@@ -34,6 +34,7 @@ public class CarRaceMVC extends Application
 	private ObjectOutputStream toServer;
 	private ObjectInputStream fromServer;
 	private CarLog log;
+	private Model model;
 
 	@Override
 	public void start(Stage primaryStage)
@@ -64,7 +65,7 @@ public class CarRaceMVC extends Application
 		//controllerList = new ArrayList<Controller>();
 		//viewList = new ArrayList<View>();
 		//modelList = new ArrayList<Model>();
-		
+
 		//button to start the multi thread server. must be the first click.
 		//create separate thread to each race.
 		btnServer.setOnAction(new EventHandler<ActionEvent>() {
@@ -80,7 +81,7 @@ public class CarRaceMVC extends Application
 				}
 			}
 		});
-		
+
 		//button to start the race. check that server is on.
 		btnRace.setOnAction(new EventHandler<ActionEvent>()
 		{ @Override
@@ -88,7 +89,7 @@ public class CarRaceMVC extends Application
 		{	
 			if(isServerOn)
 			{
-				
+
 				//open connection to server to send the race and then gambler
 				try
 				{
@@ -98,14 +99,14 @@ public class CarRaceMVC extends Application
 				}catch(IOException e){
 					System.out.println(e.getMessage());
 				}
-			
+
 				createNewWindow();
 			}else{
 				alert(AlertType.ERROR, "You should run the server first");
 			}
 		}
 		});
-		
+
 		//button to start gambler. get list view of available races
 		//from server (kind of client) and gamble on cars he want.
 		//send which race and the amount of money of each car to server.
@@ -144,12 +145,14 @@ public class CarRaceMVC extends Application
 				ArrayList<Integer> available = (ArrayList<Integer>) fromServer.readObject();
 				PacketToClient input = (PacketToClient) fromServer.readObject();
 				View view = new View();
-				view.setModel(input.getGamModel());
-				
+				model = input.getGamModel();
+				view.setModel(model);
+
 				Controller controller = new Controller(input.getGamModel(),view);
 				Stage race = new Stage();
 				Scene scene = new Scene(view.getBorderPane(),750,500);
 				view.createAllTimelines();
+				//input.getGamModel().changeSpeed(0, 20);
 				race.setScene(scene);
 				race.show();
 				scene.widthProperty().addListener(
@@ -162,13 +165,25 @@ public class CarRaceMVC extends Application
 							view.setCarPanesMaxWidth(newValue.doubleValue());
 						}
 						});
-				/*		
-				PacketToClient play = (PacketToClient) fromServer.readObject();
-				if (play.isPlay())
-					view.playSong(play.getHashMap());
-					
-					*/
-				
+
+				new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							while(true){
+								System.out.println("i am here");
+								PacketToClient play = (PacketToClient) fromServer.readObject();
+								if (play.isPlay())
+									model.playSong(play.getHashMap());
+								System.out.println("here");
+							}
+						} catch (SQLException | ClassNotFoundException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}).start();
 				System.out.println(input.getRaces());
 			} catch (ClassNotFoundException | SQLException e) {
 				// TODO Auto-generated catch block
@@ -178,9 +193,9 @@ public class CarRaceMVC extends Application
 			System.out.println(e.getMessage());
 		}
 	}
-	
-	
-	
+
+
+
 	public void alert(AlertType type,String msg)
 	{ 
 		Alert alert = new Alert(type);
