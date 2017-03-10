@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class Model implements Serializable
 	 */
 	private static final long serialVersionUID = 1L;
 	private int raceCounter;
+	private int sysId = 0;
 	private Date dateOfRace;
 	private Car c1;
 	private Car c2;
@@ -41,6 +43,7 @@ public class Model implements Serializable
 	private int gamblerCounter = 0;
 	private String carsCompete;
 	private double totalGamblingAmount = 0;
+	private double sysProfit = 0;
 	private HashMap<Integer, HashMap<Integer,Double>> gamblers;
 	private String [] musicFile = {"3 - How Bad Do You Want It - Fast & Furious 7.mp3",
 	"4 - Get Low - Fast & Furious 7.mp3"};
@@ -78,6 +81,7 @@ public class Model implements Serializable
 				calculateWinners(length.toMinutes(),times);
 				try {
 					saveRaceDB(con);
+					saveSystemCash(con);
 					saveGamblersDB(con);					
 				} catch (SQLException e) {
 					System.out.println(e.getMessage());
@@ -171,9 +175,11 @@ public class Model implements Serializable
 				{
 					carsGambling[(int) valuePair.getKey()] = true;
 					totalGamblingAmount += (Double)valuePair.getValue();
+				
 				}
 			}
 		}
+		sysProfit = totalGamblingAmount * 0.05;
 
 		int i = 0;			
 		for(int j = 0 ; j < carsGambling.length ; j++){
@@ -191,13 +197,33 @@ public class Model implements Serializable
 
 	public void saveRaceDB(Connection con) throws SQLException {
 		//totalGamblingAmount and carsCompete are null
-		PreparedStatement pst = con.prepareStatement("insert into race values(?,?,?,?,?)");
+		PreparedStatement pst = con.prepareStatement("insert into race values(?,?,?,?,?,?)");
 		pst.setString(1, String.valueOf(raceCounter));
 		pst.setString(2, carsCompete);
 		pst.setDate(3, new java.sql.Date(dateOfRace.getTime()));
 		pst.setString(4, String.valueOf(totalGamblingAmount));
 		pst.setString(5, String.valueOf(winCarIdx + 1));
+		pst.setString(6, String.valueOf(sysProfit));
 		pst.executeUpdate();	
+	}
+	
+	
+	public void saveSystemCash(Connection con) throws SQLException
+	{
+	    double currentCash = 0;
+		Statement statement = con.createStatement();
+		ResultSet sys = statement.executeQuery("select count(*) from system");
+		while (sys.next()) 
+		{
+			currentCash =  sys.getDouble(1);
+		}
+		System.out.println("system cash = " + currentCash);
+	    PreparedStatement pst = con.prepareStatement("insert into system values(?,?)");
+	    pst.setString(1, String.valueOf(sysId));
+	    pst.setString(2,String.valueOf(currentCash+sysProfit));
+	    pst.executeUpdate();
+
+		
 	}
 
 	public void saveGamblersDB(Connection con) throws SQLException {
