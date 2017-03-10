@@ -1,14 +1,23 @@
 import java.awt.image.ColorModel;
+import java.io.File;
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
+import javafx.collections.ObservableMap;
+import javafx.event.EventHandler;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaMarkerEvent;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
 import java.sql.Statement;
 
@@ -33,8 +42,14 @@ public class Model implements Serializable
 	private String carsCompete;
 	private double totalGamblingAmount = 0;
 	private HashMap<Integer, HashMap<Integer,Double>> gamblers;
+	private String [] musicFile = {"3 - How Bad Do You Want It - Fast & Furious 7.mp3",
+	"4 - Get Low - Fast & Furious 7.mp3"};
+	private transient Media sound;
+	private transient MediaPlayer mediaPlayer;
+	private Duration length;
+	private int times;
 
-	public Model(int raceCounter, int gamblerCount){	
+	public Model(int raceCounter, int gamblerCount) throws SQLException{	
 		this.raceCounter = raceCounter;
 		this.gamblerCounter = gamblerCount;
 		c1=new Car(0,raceCounter);
@@ -42,8 +57,33 @@ public class Model implements Serializable
 		c3=new Car(2,raceCounter);
 		c4=new Car(3,raceCounter);
 		c5=new Car(4,raceCounter);
+		int Low = 0;
+		int High = 2;
+		Connection con = DriverManager.getConnection
+				("jdbc:mysql://localhost/carsRace", "scott", "tiger");
 		carsSpeed = new double [5];
 		gamblers = new HashMap<>();
+		Random rand = new Random();
+		sound = new Media(new File(musicFile[rand.nextInt(High - Low) + Low]).toURI().toString());
+		mediaPlayer = new MediaPlayer(sound);
+		mediaPlayer.setOnEndOfMedia(new Runnable() {
+			@Override
+			public void run() {
+				//endRace();
+				changeSpeed(0, 0);
+				changeSpeed(1, 0);
+				changeSpeed(2, 0);
+				changeSpeed(3, 0);
+				changeSpeed(4, 0);
+				calculateWinners(length.toMinutes(),times);
+				try {
+					saveRaceDB(con);
+					saveGamblersDB(con);					
+				} catch (SQLException e) {
+					System.out.println(e.getMessage());
+				}
+			}
+		});
 	}
 
 	public void changeColor(int id,Color color)
@@ -58,7 +98,7 @@ public class Model implements Serializable
 
 	public void changeSpeed(int id,double speed)
 	{	
-		//getCarById(id).setSpeed(speed);
+		getCarById(id).setSpeed(speed);
 		carsSpeed[id] += speed;
 	}
 
@@ -83,7 +123,7 @@ public class Model implements Serializable
 	{	
 		return raceCounter;
 	}
-	
+
 	public int getWinnerCar(){
 		return winCarIdx;
 	}
@@ -102,7 +142,7 @@ public class Model implements Serializable
 				max = carsSpeed[i];
 				winCarIdx = i;
 			}
-		
+
 		System.out.println("Car no. " + (winCarIdx + 1) + " win, " + "distance = " + max);
 		Iterator it = gamblers.entrySet().iterator();
 		while(it.hasNext()){
@@ -134,7 +174,7 @@ public class Model implements Serializable
 				}
 			}
 		}
-		
+
 		int i = 0;			
 		for(int j = 0 ; j < carsGambling.length ; j++){
 			if(carsGambling[j])
@@ -143,7 +183,7 @@ public class Model implements Serializable
 				carsCompete += (j + 1) + ",";
 			}			
 		}
-		
+
 		if (i >= 3)
 			return true;
 		else return false;
@@ -159,7 +199,7 @@ public class Model implements Serializable
 		pst.setString(5, String.valueOf(winCarIdx + 1));
 		pst.executeUpdate();	
 	}
-	
+
 	public void saveGamblersDB(Connection con) throws SQLException {
 		int idx = 1;
 		Iterator it = gamblers.entrySet().iterator();
@@ -179,13 +219,47 @@ public class Model implements Serializable
 		}		
 	}
 
-	
-	
-	
-	
-	
+	public void playSong(HashMap<Integer, Double> hashMap) throws SQLException {
+		//mediaPlayer.play();
+		//length = mediaPlayer.getTotalDuration();
+		length = sound.getDuration();
+		int interval = 1;//one second
+		ObservableMap<String, Duration> partsMap = sound.getMarkers();
+		times = 0;
+		for (times = 0 ; times < length.toMinutes() ; times += interval){
+			partsMap.put("part" + times, Duration.minutes(times));
+		}
+		
+		mediaPlayer.setOnMarker(new EventHandler<MediaMarkerEvent>() {	
+			@Override
+			public void handle(MediaMarkerEvent event) {
+				randomSpeed(hashMap);				
+			}
+		});
+		new Thread(){
+			@Override
+			public void run() {
+				mediaPlayer.play();
+			}
+		}.start();
+
+	}
+
+	public void randomSpeed(HashMap<Integer, Double> hashMap){
+		Iterator it = hashMap.entrySet().iterator();
+		Random rand = new Random();
+		int Low = 1;
+		int High = 50;
+		while (it.hasNext()) {
+	        Map.Entry pair = (Map.Entry)it.next();
+	        changeSpeed((int) pair.getKey(), rand.nextInt(High - Low) + Low);
+	    }	
+	}
+
+
+
 	public void setDate(Date dateOfRace) {
 		this.dateOfRace = dateOfRace;
 	}
-	
+
 }

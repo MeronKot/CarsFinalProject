@@ -234,7 +234,7 @@ public class Server extends Application{
 						});
 					}
 				}
-			} catch (IOException | ClassNotFoundException | NullPointerException e) {
+			} catch (IOException | ClassNotFoundException | NullPointerException | SQLException e) {
 				Platform.runLater(new Runnable() {
 
 					@Override
@@ -262,7 +262,7 @@ public class Server extends Application{
 
 	}
 
-	public void checkAndStartRace(GamblerDetailsToServer packet, ObjectOutputStream outputToClient) {
+	public void checkAndStartRace(GamblerDetailsToServer packet, ObjectOutputStream outputToClient) throws SQLException {
 		int raceId = packet.getRaceId();
 		Model modelOfCurrentRace = modelList.get(raceId - 1);
 		//View viewOfCurrentRace = packet.getgViewList().get(raceId - 1);
@@ -272,10 +272,10 @@ public class Server extends Application{
 
 		modelOfCurrentRace.setGambler(packet.getGamblerAmounts());
 		if(modelOfCurrentRace.checkIfRaceReady())
-		{
+		{/*
 			try {
 				PacketToClient play = new PacketToClient(true,packet.getGamblerAmounts());
-				outputToClient.writeObject(packet);
+				outputToClient.writeObject(play);
 			} catch (IOException e) {
 				Platform.runLater(new Runnable() {
 					@Override
@@ -285,6 +285,9 @@ public class Server extends Application{
 				});
 			}
 			//viewOfCurrentRace.playSong(packet.getGamblerAmounts());
+			 * 
+			 */
+			modelOfCurrentRace.playSong(packet.getGamblerAmounts());
 		}
 	}
 }

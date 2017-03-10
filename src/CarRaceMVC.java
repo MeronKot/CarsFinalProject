@@ -145,6 +145,7 @@ public class CarRaceMVC extends Application
 				PacketToClient input = (PacketToClient) fromServer.readObject();
 				View view = new View();
 				view.setModel(input.getGamModel());
+				
 				Controller controller = new Controller(input.getGamModel(),view);
 				Stage race = new Stage();
 				Scene scene = new Scene(view.getBorderPane(),750,500);
@@ -161,16 +162,13 @@ public class CarRaceMVC extends Application
 							view.setCarPanesMaxWidth(newValue.doubleValue());
 						}
 						});
-				/*
-					
-				this shit not working!!!
-				
+				/*		
 				PacketToClient play = (PacketToClient) fromServer.readObject();
 				if (play.isPlay())
 					view.playSong(play.getHashMap());
 					
-					
-				*/
+					*/
+				
 				System.out.println(input.getRaces());
 			} catch (ClassNotFoundException | SQLException e) {
 				// TODO Auto-generated catch block
@@ -180,6 +178,8 @@ public class CarRaceMVC extends Application
 			System.out.println(e.getMessage());
 		}
 	}
+	
+	
 	
 	public void alert(AlertType type,String msg)
 	{ 

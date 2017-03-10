@@ -26,7 +26,7 @@ public class Controller implements CarEvents
 	public Controller(Model model, View view)
 	{	
 		this.model = model;
-
+		this.view = view;
 		//change all this to random, not input from user
 	}
 	

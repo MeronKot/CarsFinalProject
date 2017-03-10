@@ -32,7 +32,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaMarkerEvent;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
-public class View implements Serializable
+public class View implements Serializable 
 { 
 	private Model model;
 	private BorderPane border_pane;
@@ -44,41 +44,17 @@ public class View implements Serializable
 	private ComboBox<String> colorComBox, carIdComBox;
 	private ObservableList<String> items_color, items_car;
 	private Button btn;
-	private String [] musicFile = {"3 - How Bad Do You Want It - Fast & Furious 7.mp3",
-			"4 - Get Low - Fast & Furious 7.mp3"};
-	private Media sound;
-	private MediaPlayer mediaPlayer;
-	private Duration length;
-	private int times;
+
 	private Connection con;
 	
 	public View(/*Connection con*/) throws SQLException
 	{	
-		int Low = 0;
-		int High = 2;
-		Random rand = new Random();
-		this.con = DriverManager.getConnection
-				("jdbc:mysql://localhost/carsRace", "scott", "tiger");
 		border_pane = new BorderPane();
 		//createDetailsGrid();
 		//border_pane.setTop(details_grid);
 		createCarsGrid();
 		border_pane.setCenter(cars_grid);
-		sound = new Media(new File(musicFile[rand.nextInt(High - Low) + Low]).toURI().toString());
-		mediaPlayer = new MediaPlayer(sound);
-		mediaPlayer.setOnEndOfMedia(new Runnable() {
-			@Override
-			public void run() {
-				endRace();
-				model.calculateWinners(length.toMinutes(),times);
-				try {
-					model.saveRaceDB(con);
-					model.saveGamblersDB(con);					
-				} catch (SQLException e) {
-					System.out.println(e.getMessage());
-				}
-			}
-		});
+		
 	}
 	/*
 	public void saveCarsToDB() throws SQLException {
@@ -110,7 +86,7 @@ public class View implements Serializable
 		car_pane4.getTimeline().pause();
 		car_pane5.getTimeline().pause();
 	}
-	
+	/*
 	public void randomSpeed(HashMap<Integer, Double> hashMap){
 		Iterator it = hashMap.entrySet().iterator();
 		Random rand = new Random();
@@ -121,7 +97,7 @@ public class View implements Serializable
 	        model.changeSpeed((int) pair.getKey(), rand.nextInt(High - Low) + Low);
 	    }	
 	}
-	
+	*/
 	public void setModel(Model myModel)
 	{	
 		model = myModel;
@@ -322,7 +298,7 @@ public class View implements Serializable
 	{	
 		return slRadius;
 	}
-	
+	/*
 	public void playSong(HashMap<Integer, Double> hashMap) throws SQLException {
 		//mediaPlayer.play();
 		//length = mediaPlayer.getTotalDuration();
@@ -348,4 +324,5 @@ public class View implements Serializable
 		}.start();
 
 	}
+	*/
 }
