@@ -13,15 +13,6 @@ import javafx.scene.shape.Polygon;
 import javafx.util.Duration;
 public class CarPane extends Pane implements CarEvents
 { 
-	class ColorEvent implements  EventHandler<Event>
-	{ 
-		@Override
-		public void handle(Event event)
-		{	
-			//setColor(car.getColor());
-		}
-	}
-
 	class RadiusEvent implements EventHandler<Event>
 	{ 
 		@Override
@@ -68,10 +59,8 @@ public class CarPane extends Pane implements CarEvents
 	public void setCarModel(Car myCar)
 	{	
 		car = myCar;
-		//car.setColor(color);
 		if (car != null)
 		{ 
-			car.addEventHandler(new ColorEvent(), eventType.COLOR);
 			car.addEventHandler(new RadiusEvent(), eventType.RADIUS);
 			car.addEventHandler(new SpeedEvent(), eventType.SPEED);
 		}
@@ -201,10 +190,6 @@ public class CarPane extends Pane implements CarEvents
 		Random rand = new Random();
 		EventHandler<ActionEvent> eventHandler = e ->
 		{ 
-			//change to random speed
-			//in future to write method to calculate according to song
-			//or each half minute
-			//moveCar(MOVE);
 			moveCar(MOVE);// move car pane according to limits
 		};
 		tl = new Timeline();

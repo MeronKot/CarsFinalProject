@@ -11,7 +11,6 @@ public class Car implements CarEvents,Serializable
 	private int id;
 	private int model_id;
 	private double speed;
-	//private Color color;
 	private int wheelRadius;
 	private Map<eventType, ArrayList<EventHandler<Event>>> carHashMap;
 	
@@ -20,7 +19,6 @@ public class Car implements CarEvents,Serializable
 		this.id = id;
 		this.model_id = model_id;
 		this.speed = 1;
-		//this.color = Color.RED;
 		this.wheelRadius = 5;
 		carHashMap = new HashMap<eventType, ArrayList<EventHandler<Event>>>();
 		for (eventType et : eventType.values())
@@ -33,23 +31,14 @@ public class Car implements CarEvents,Serializable
 	public int getModelId()
 	{	return model_id;
 	}
-/*
-	public Color getColor()
-	{	return color;
-	}
-*/
+
 	public int getRadius()
 	{	return wheelRadius;
 	}
 	public double getSpeed()
 	{	return speed;
 	}
-/*
-	public void setColor(Color color)
-	{	this.color = color;
-	processEvent(eventType.COLOR, new ActionEvent());
-	}
-*/
+
 	public void setSpeed(double speed)
 	{	this.speed = speed;
 	processEvent(eventType.SPEED, new ActionEvent());

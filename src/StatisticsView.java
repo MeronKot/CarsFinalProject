@@ -44,7 +44,7 @@ public class StatisticsView extends Application
 	}
 
 	private Object showDetails() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 

@@ -25,15 +25,11 @@ public class CarRaceMVC extends Application
 	private Button btnServer = new Button("Server");
 	private Button btnRace = new Button("Race");
 	private Button btnGambler = new Button("Gambler");
-	private ArrayList<Controller> controllerList;
-	private ArrayList<View> viewList;
-	private ArrayList<Model> modelList;
 	private int raceCounter = 0;
 	private boolean isServerOn = false;
 	private Socket socket;
 	private ObjectOutputStream toServer;
 	private ObjectInputStream fromServer;
-	private CarLog log;
 	private Model model;
 
 	@Override
@@ -53,18 +49,17 @@ public class CarRaceMVC extends Application
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>()
 		{ @Override
 			public void handle(WindowEvent event)
-		{	try
-		{ Platform.exit();
-		} 
-		catch (Exception e)
-		{ // TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		{	
+			try
+			{ 
+				Platform.exit();
+			} 
+			catch (Exception e)
+			{ // TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		});
-		//controllerList = new ArrayList<Controller>();
-		//viewList = new ArrayList<View>();
-		//modelList = new ArrayList<Model>();
 
 		//button to start the multi thread server. must be the first click.
 		//create separate thread to each race.
@@ -115,9 +110,29 @@ public class CarRaceMVC extends Application
 			public void handle(ActionEvent event) {
 				Stage gambler = new Stage();
 				try {
-					if(isServerOn)
+					if(isServerOn){
 						new Gambler().start(gambler);
-					else{
+
+						new Thread(new Runnable() {
+
+							@Override
+							public void run() {
+								while(true){
+									try {
+										PacketToClient play = (PacketToClient) fromServer.readObject();
+										if (play.isPlay())
+										{
+											play.getGamModel().playSong(play.getHashMap());
+										}
+									} catch (SQLException | ClassNotFoundException | IOException e) {
+										// TODO Auto-generated catch block
+										System.out.println(e.getMessage());
+									}
+								}								
+							}
+						}).start();
+
+					}else{
 						alert(AlertType.ERROR, "You should run the server first");
 					}
 				} catch (Exception e) {
@@ -127,7 +142,6 @@ public class CarRaceMVC extends Application
 			}
 		});
 		primaryStage.show(); // Display the stage
-		//primaryStage.setAlwaysOnTop(true);
 	}
 
 	public static void main(String[] args)
@@ -137,63 +151,35 @@ public class CarRaceMVC extends Application
 
 	public void createNewWindow()
 	{	
-		try
-		{
+		try {
 			GamblerDetailsToServer packet = new GamblerDetailsToServer();
 			toServer.writeObject(packet);
-			try {
-				ArrayList<Integer> available = (ArrayList<Integer>) fromServer.readObject();
-				PacketToClient input = (PacketToClient) fromServer.readObject();
-				View view = new View();
-				model = input.getGamModel();
-				view.setModel(model);
-
-				Controller controller = new Controller(input.getGamModel(),view);
-				Stage race = new Stage();
-				Scene scene = new Scene(view.getBorderPane(),750,500);
-				view.createAllTimelines();
-				//input.getGamModel().changeSpeed(0, 20);
-				race.setScene(scene);
-				race.show();
-				scene.widthProperty().addListener(
-						new ChangeListener<Number>()
-						{ @Override
-							public void changed(
-									ObservableValue<? extends Number> observable,
-									Number oldValue, Number newValue)
-						{	// TODO Auto-generated method stub
-							view.setCarPanesMaxWidth(newValue.doubleValue());
-						}
-						});
-
-				new Thread(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							while(true){
-								System.out.println("i am here");
-								PacketToClient play = (PacketToClient) fromServer.readObject();
-								if (play.isPlay())
-									model.playSong(play.getHashMap());
-								System.out.println("here");
-							}
-						} catch (SQLException | ClassNotFoundException | IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+			ArrayList<Integer> available = (ArrayList<Integer>) fromServer.readObject();
+			PacketToClient input = (PacketToClient) fromServer.readObject();
+			View view = new View();
+			model = input.getGamModel();
+			view.setModel(model);
+			Controller controller = new Controller(input.getGamModel(),view);
+			Stage race = new Stage();
+			Scene scene = new Scene(view.getBorderPane(),750,500);
+			view.createAllTimelines();
+			race.setScene(scene);
+			race.show();
+			scene.widthProperty().addListener(
+					new ChangeListener<Number>()
+					{ @Override
+						public void changed(
+								ObservableValue<? extends Number> observable,
+								Number oldValue, Number newValue)
+					{	// TODO Auto-generated method stub
+						view.setCarPanesMaxWidth(newValue.doubleValue());
 					}
-				}).start();
-				System.out.println(input.getRaces());
-			} catch (ClassNotFoundException | SQLException e) {
-				// TODO Auto-generated catch block
-				System.out.println(e.getStackTrace());
-			}
-		}catch(IOException e){
+					});
+		} catch (IOException | SQLException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
 			System.out.println(e.getMessage());
 		}
 	}
-
 
 
 	public void alert(AlertType type,String msg)

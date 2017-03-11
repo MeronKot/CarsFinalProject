@@ -9,12 +9,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 public class Controller implements CarEvents
 {
-	private final int MAXSPEED = 200;
-	private final int CAR1_ID = 0;
-	private final int CAR2_ID = 1;
-	private final int CAR3_ID = 2;
-	private final int CAR4_ID = 3;
-	private final int CAR5_ID = 4;
+
 	private Stage stg;
 	private Model model;
 	private View view;

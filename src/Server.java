@@ -33,9 +33,7 @@ public class Server extends Application{
 	private TextArea ta = new TextArea();
 	private ServerSocket serverSocket;
 	private Socket socket;
-	private HashMap <Integer,Controller> controllerList = new HashMap<>();
 	private HashMap <Integer,Model> modelList = new HashMap<>();
-	private ArrayList <GamblerDetailsToServer> gamblers = new ArrayList<>();
 	private int races = 0;
 	private ArrayList<Integer> availableRaces = new ArrayList<>();
 	private Connection connection;
@@ -69,7 +67,7 @@ public class Server extends Application{
 				}
 			}
 		});
-		
+
 		stat.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -86,13 +84,12 @@ public class Server extends Application{
 				}
 			}
 		});
-		
+
 		pane.getChildren().addAll(new ScrollPane(ta),data,stat);
 		Scene scene = new Scene(pane, 450, 200);
 		primaryStage.setTitle("CarServer"); // Set the stage title
 		primaryStage.setScene(scene); // Place the scene in the stage
 		primaryStage.show(); // Display the stage
-		//primaryStage.setAlwaysOnTop(true);
 		primaryStage.setOnCloseRequest(
 				new EventHandler<WindowEvent>()
 				{ public void handle(WindowEvent event)
@@ -162,20 +159,20 @@ public class Server extends Application{
 	}
 
 	private void createTables() throws SQLException {
+
 		statement.execute("create table Race(raceId char(5) not null, cars varchar(25), dateOfRace date, totalAmount varchar(25), winCar varchar(25), systemCash varchar(25), "
 				+ "constraint pkRace primary key (raceId))");
 
-		statement.execute("create table Gambler(gamblerId char(5) not null, raceId varchar(25) unique,"
+		statement.execute("create table Gambler(gamblerId char(5) not null, raceId varchar(25),"
 				+ " car1 varchar(25), car2 varchar(25), car3 varchar(25), car4 varchar(25), car5 varchar(25),"
 				+ " constraint pkGambler primary key (gamblerId),"
 				+ " constraint fkRaceId foreign key (raceId) references Race(raceId))");
 
 		statement.execute("create table Car(carId char(5) not null, speed varchar(25), color varchar(25), wheelRadius varchar(25),"
 				+ " constraint pkCar primary key (carId))");
-	
-		statement.execute("create table System(sysId char(5) not null, cash varchar(25)," 
-						+ "constraint pkCar primary key (sysId))");
 
+		statement.execute("create table System(sysId char(5) not null, cash varchar(25)," 
+				+ "constraint pkCar primary key (sysId))");
 	}
 
 	class HandleRace implements Runnable
@@ -197,8 +194,7 @@ public class Server extends Application{
 				while (true){
 					GamblerDetailsToServer packet = (GamblerDetailsToServer)inputFromClient.readObject();
 					if(packet.gamblerClient()){
-						gamblers.add(packet);
-						checkAndStartRace(packet,outputToClient);
+						checkAndStartRace(packet);
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -215,40 +211,12 @@ public class Server extends Application{
 					}else{
 						races++;
 						availableRaces.add(races);
-						Model model = new Model(races,gamblerCount);
+						Model model = new Model(races,gamblerCount,outputToClient);
 						packetToClient = new PacketToClient(connection,model,races);
 						outputToClient.writeObject(packetToClient);
-						//Controller controller = new Controller(model);
-						//view.saveCarsToDB();
 						modelList.put(races - 1, model);
-						//controllerList.put(races - 1,controller);
 						dateOfRace = new Date();
 						model.setDate(dateOfRace);
-						/*
-						Platform.runLater(new Runnable() {
-							@Override
-							public void run() {
-								Stage stg = new Stage();
-								Scene scene = new Scene(packet.getgView().getBorderPane(), 750, 500);
-								controller.setOwnerStage(stg);
-								//packet.getgView().createAllTimelines();
-								stg.setScene(scene);
-								stg.setTitle("CarRaceView" + races);
-								stg.setAlwaysOnTop(true);
-								stg.show();
-								scene.widthProperty().addListener(
-										new ChangeListener<Number>()
-										{ @Override
-											public void changed(
-													ObservableValue<? extends Number> observable,
-													Number oldValue, Number newValue)
-										{	// TODO Auto-generated method stub
-											//packet.getgView().setCarPanesMaxWidth(newValue.doubleValue());
-										}
-										});
-							}
-						});
-						 */
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -285,10 +253,9 @@ public class Server extends Application{
 
 	}
 
-	public void checkAndStartRace(GamblerDetailsToServer packet, ObjectOutputStream outputToClient) throws SQLException {
+	public void checkAndStartRace(GamblerDetailsToServer packet) throws SQLException {
 		int raceId = packet.getRaceId();
 		Model modelOfCurrentRace = modelList.get(raceId - 1);
-		//View viewOfCurrentRace = packet.getgViewList().get(raceId - 1);
 		Random rand = new Random();
 		int Low = 1;
 		int High = 50;
@@ -297,8 +264,10 @@ public class Server extends Application{
 		if(modelOfCurrentRace.checkIfRaceReady())
 		{
 			try {
-				PacketToClient play = new PacketToClient(true,packet.getGamblerAmounts());
-				outputToClient.writeObject(play);
+				PacketToClient play = new PacketToClient(true,modelOfCurrentRace.getGamblers().get(modelOfCurrentRace.getGamblerCounter() - 1));
+				play.setGamModel(modelOfCurrentRace);
+				play.setDateOfRace(modelOfCurrentRace.getDateOfRace());
+				modelOfCurrentRace.getOutToClientOfThisModel().writeObject(play);
 			} catch (IOException e) {
 				Platform.runLater(new Runnable() {
 					@Override
@@ -307,10 +276,19 @@ public class Server extends Application{
 					}
 				});
 			}
-			//viewOfCurrentRace.playSong(packet.getGamblerAmounts());
-			  
-			 
-			//modelOfCurrentRace.playSong(packet.getGamblerAmounts());
+		}else{
+			try {
+				PacketToClient play = new PacketToClient(false,modelOfCurrentRace.getGamblers().get(modelOfCurrentRace.getGamblerCounter()));
+				play.setGamModel(modelOfCurrentRace);
+				modelOfCurrentRace.getOutToClientOfThisModel().writeObject(play);
+			} catch (IOException e) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						ta.appendText(e.getMessage());						
+					}
+				});
+			}
 		}
 	}
 }

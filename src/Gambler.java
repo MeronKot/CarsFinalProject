@@ -49,7 +49,7 @@ public class Gambler extends Application {
 	private Connection con;
 	private Model model;
 	private int pRaces;
-	
+
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -61,16 +61,6 @@ public class Gambler extends Application {
 			toServer = new ObjectOutputStream(socket.getOutputStream());
 			fromServer = new ObjectInputStream(socket.getInputStream());
 			availableRaces = (ArrayList<Integer>)fromServer.readObject();
-			/*
-			recivedPacket = (PacketToClient)fromServer.readObject();
-			//con = recivedPacket.getCon();
-			model = recivedPacket.getGamModel();
-			pRaces = recivedPacket.getRaces();
-			view = new View();// talk about this!!
-			view.setModel(model);
-			viewList.put(pRaces - 1,view);
-			*/
-
 		}catch(IOException e){
 		}
 
