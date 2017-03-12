@@ -30,9 +30,9 @@ public class Model implements Serializable
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int raceCounter;
-	private int sysId = 0;
-	private Date dateOfRace;
+	static int raceCounter;
+	static int sysId = 0;
+	static Date dateOfRace;
 	public Date getDateOfRace() {
 		return dateOfRace;
 	}
@@ -49,10 +49,10 @@ public class Model implements Serializable
 	private double [] carsSpeed;
 	private int winCarIdx;
 	private int gamblerCounter = 0;
-	private String carsCompete;
-	private double totalGamblingAmount = 0;
-	private double sysProfit = 0;
-	private HashMap<Integer, HashMap<Integer,Double>> gamblers;
+	static String carsCompete;
+	static double totalGamblingAmount = 0;
+	static double sysProfit = 0;
+	static HashMap<Integer, HashMap<Integer,Double>> gamblers;
 	private String [] musicFile = {"3 - How Bad Do You Want It - Fast & Furious 7.mp3",
 	"4 - Get Low - Fast & Furious 7.mp3"};
 	private transient Media sound;
@@ -152,7 +152,8 @@ public class Model implements Serializable
 			if (entry.getValue() > 0)
 				actualGam.put(entry.getKey(), entry.getValue());					
 		}
-		gamblers.put(gamblerCounter, actualGam);
+		this.gamblers.put(gamblerCounter, actualGam);
+		System.out.println(gamblers.toString());
 		gamblerCounter++;
 	}
 
@@ -213,9 +214,9 @@ public class Model implements Serializable
 			currentCash =  sys.getDouble(1);
 		}
 		System.out.println("system cash = " + currentCash);
-		PreparedStatement pst = con.prepareStatement("insert into system values(?,?)");
-		pst.setString(1, String.valueOf(sysId));
-		pst.setString(2,String.valueOf(currentCash+sysProfit));
+		PreparedStatement pst = con.prepareStatement("update system set cash = ? where sysId = ?");
+		pst.setString(1,String.valueOf(currentCash+sysProfit));
+		pst.setString(2, String.valueOf(sysId));
 		pst.executeUpdate();
 
 
@@ -251,7 +252,6 @@ public class Model implements Serializable
 		mediaPlayer.setOnEndOfMedia(new Runnable() {
 			@Override
 			public void run() {
-				//endRace();
 				changeSpeed(0, 0);
 				changeSpeed(1, 0);
 				changeSpeed(2, 0);
@@ -269,7 +269,7 @@ public class Model implements Serializable
 		});
 
 		try {
-			Thread.sleep(300);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
