@@ -122,7 +122,8 @@ public class CarRaceMVC extends Application
 										PacketToClient play = (PacketToClient) fromServer.readObject();
 										if (play.isPlay())
 										{
-											play.getGamModel().playSong(play.getHashMap());
+											//play.getGamModel().playSong(play.getHashMap());
+											model.playSong();
 										}
 									} catch (SQLException | ClassNotFoundException | IOException e) {
 										// TODO Auto-generated catch block
@@ -158,6 +159,7 @@ public class CarRaceMVC extends Application
 			PacketToClient input = (PacketToClient) fromServer.readObject();
 			View view = new View();
 			model = input.getGamModel();
+			model.configureMedia();
 			view.setModel(model);
 			Controller controller = new Controller(input.getGamModel(),view);
 			Stage race = new Stage();

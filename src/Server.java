@@ -212,11 +212,11 @@ public class Server extends Application{
 						races++;
 						availableRaces.add(races);
 						Model model = new Model(races,gamblerCount,outputToClient);
+						dateOfRace = new Date();
+						model.setDate(dateOfRace);
 						packetToClient = new PacketToClient(connection,model,races);
 						outputToClient.writeObject(packetToClient);
 						modelList.put(races - 1, model);
-						dateOfRace = new Date();
-						model.setDate(dateOfRace);
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {

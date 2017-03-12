@@ -220,7 +220,7 @@ public class CarPane extends Pane implements CarEvents
 	{	
 		if (speed == STOP)
 		{ 
-			tl.stop();
+			tl.pause();
 		}
 		else
 		{ 
