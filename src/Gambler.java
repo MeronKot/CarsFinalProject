@@ -3,11 +3,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -28,7 +28,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javafx.application.Platform;
 
 public class Gambler extends Application {
 
@@ -86,6 +85,9 @@ public class Gambler extends Application {
 					public void handle(WindowEvent event)
 					{ 
 						try {
+							GamblerDetailsToServer close = new GamblerDetailsToServer();
+							close.setClose(true);
+							toServer.writeObject(close);
 							socket.close();
 						} catch (IOException e) {
 							System.out.println("i am here x");
@@ -163,6 +165,9 @@ public class Gambler extends Application {
 						toServer.writeObject(packet);
 						alert(AlertType.INFORMATION,"Goodluck");
 						try {
+							GamblerDetailsToServer close = new GamblerDetailsToServer();
+							close.setClose(true);
+							toServer.writeObject(close);
 							socket.close();
 						} catch (IOException e) {
 							System.out.println("i am here goodLuck");
@@ -171,6 +176,9 @@ public class Gambler extends Application {
 					}catch(IOException | NumberFormatException e){
 						alert(AlertType.ERROR,e.getMessage());
 						try {
+							GamblerDetailsToServer close = new GamblerDetailsToServer();
+							close.setClose(true);
+							toServer.writeObject(close);
 							socket.close();
 						} catch (IOException e1) {
 							System.out.println("i am here notGood");
@@ -180,6 +188,9 @@ public class Gambler extends Application {
 				}else{
 					alert(AlertType.ERROR,"No available races");
 					try {
+						GamblerDetailsToServer close = new GamblerDetailsToServer();
+						close.setClose(true);
+						toServer.writeObject(close);
 						socket.close();
 					} catch (IOException e1) {
 						System.out.println("i am here no races");

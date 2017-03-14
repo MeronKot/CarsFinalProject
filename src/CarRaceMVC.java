@@ -117,19 +117,19 @@ public class CarRaceMVC extends Application
 
 							@Override
 							public void run() {
-								while(true){
-									try {
+								try {
+									if(fromServer != null){
 										PacketToClient play = (PacketToClient) fromServer.readObject();
 										if (play.isPlay())
 										{
-											//play.getGamModel().playSong(play.getHashMap());
-											model.playSong();
+											play.getGamModel().playSong();
 										}
-									} catch (SQLException | ClassNotFoundException | IOException e) {
-										// TODO Auto-generated catch block
-										System.out.println(e.getMessage());
 									}
-								}								
+								} catch (SQLException | ClassNotFoundException | IOException e) {
+									// TODO Auto-generated catch block
+									System.out.println(e.getMessage());
+								}
+
 							}
 						}).start();
 
@@ -177,6 +177,30 @@ public class CarRaceMVC extends Application
 						view.setCarPanesMaxWidth(newValue.doubleValue());
 					}
 					});
+
+			new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						while(true){
+							if(fromServer != null){
+								PacketToClient play = (PacketToClient) fromServer.readObject();
+
+								if (play.isPlay())
+								{
+									play.getGamModel().playSong();
+								}
+							}
+						}
+					} catch (SQLException | ClassNotFoundException | IOException e) {
+						// TODO Auto-generated catch block
+						System.out.println(e.getMessage());
+					}
+
+				}
+			}).start();
+
 		} catch (IOException | SQLException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			System.out.println(e.getMessage());

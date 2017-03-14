@@ -6,21 +6,20 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+//import javafx.scene.paint.Color;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+
 import javafx.collections.ObservableMap;
 import javafx.event.EventHandler;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaMarkerEvent;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
-
-import java.sql.Statement;
-//import javafx.scene.paint.Color;
 
 public class Model implements Serializable
 { 
@@ -28,10 +27,9 @@ public class Model implements Serializable
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int raceCounter;
-	private int sysId = 0;
-	private Date dateOfRace;
-	private Car c1;
+	static int raceCounter;
+	static int sysId = 0;
+	static Date dateOfRace;	private Car c1;
 	private Car c2;
 	private Car c3;
 	private Car c4;
@@ -39,11 +37,10 @@ public class Model implements Serializable
 	private double [] carsSpeed;
 	private int winCarIdx;
 	private int gamblerCounter = 0;
-	private String carsCompete;
-	private double totalGamblingAmount = 0;
-	private double sysProfit = 0;
-	private HashMap<Integer, HashMap<Integer,Double>> gamblers;
-	private String [] musicFile = {"3 - How Bad Do You Want It - Fast & Furious 7.mp3",
+	static String carsCompete;
+	static double totalGamblingAmount = 0;
+	static double sysProfit = 0;
+	static HashMap<Integer, HashMap<Integer,Double>> gamblers;	private String [] musicFile = {"3 - How Bad Do You Want It - Fast & Furious 7.mp3",
 	"4 - Get Low - Fast & Furious 7.mp3"};
 	private transient Media sound;
 	private transient MediaPlayer mediaPlayer;
@@ -62,8 +59,6 @@ public class Model implements Serializable
 		c5=new Car(4,raceCounter);
 		carsSpeed = new double [5];
 		gamblers = new HashMap<>();
-
-
 	}
 
 	public ObjectOutputStream getOutToClientOfThisModel() {
@@ -194,9 +189,9 @@ public class Model implements Serializable
 			currentCash =  sys.getDouble(1);
 		}
 		System.out.println("system cash = " + currentCash);
-		PreparedStatement pst = con.prepareStatement("insert into system values(?,?)");
-		pst.setString(1, String.valueOf(sysId));
-		pst.setString(2,String.valueOf(currentCash+sysProfit));
+		PreparedStatement pst = con.prepareStatement("update system set cash = ? where sysId = ?");
+		pst.setString(1,String.valueOf(currentCash+sysProfit));
+		pst.setString(2, String.valueOf(sysId));
 		pst.executeUpdate();
 	}
 
@@ -337,45 +332,45 @@ public class Model implements Serializable
 			Random rand = new Random();
 			sound = new Media(new File(musicFile[rand.nextInt(High - Low) + Low]).toURI().toString());
 			mediaPlayer = new MediaPlayer(sound);
-			mediaPlayer.setOnEndOfMedia(new Runnable() {
+			mediaPlayer.setOnReady(new Runnable() {
+				
 				@Override
 				public void run() {
-					//endRace();
-					changeSpeed(0, 0);
-					changeSpeed(1, 0);
-					changeSpeed(2, 0);
-					changeSpeed(3, 0);
-					changeSpeed(4, 0);
-					calculateWinners(length.toMinutes(),times);
-					try {
-						saveRaceDB(con);
-						saveSystemCash(con);
-						saveGamblersDB(con);					
-					} catch (SQLException e) {
-						System.out.println(e.getMessage());
+					length = sound.getDuration();
+					int interval = 1;//one second
+					ObservableMap<String, Duration> partsMap = sound.getMarkers();
+					times = 0;
+					for (times = 0 ; times < length.toMinutes() ; times += interval){
+						partsMap.put("part" + times, Duration.minutes(times));
 					}
-				}
-			});
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			length = sound.getDuration();
-			int interval = 1;//one second
-			ObservableMap<String, Duration> partsMap = sound.getMarkers();
-			times = 0;
-			for (times = 0 ; times < length.toMinutes() ; times += interval){
-				partsMap.put("part" + times, Duration.minutes(times));
-			}
 
-			mediaPlayer.setOnMarker(new EventHandler<MediaMarkerEvent>() {	
-				@Override
-				public void handle(MediaMarkerEvent event) {
-					randomSpeed();
+					mediaPlayer.setOnMarker(new EventHandler<MediaMarkerEvent>() {	
+						@Override
+						public void handle(MediaMarkerEvent event) {
+							randomSpeed();
+						}
+					});
+					mediaPlayer.setOnEndOfMedia(new Runnable() {
+						@Override
+						public void run() {
+							changeSpeed(0, 0);
+							changeSpeed(1, 0);
+							changeSpeed(2, 0);
+							changeSpeed(3, 0);
+							changeSpeed(4, 0);
+							calculateWinners(length.toMinutes(),times);
+							try {
+								saveRaceDB(con);
+								saveSystemCash(con);
+								saveGamblersDB(con);					
+							} catch (SQLException e) {
+								System.out.println(e.getMessage());
+							}
+						}
+					});
 				}
 			});
+			
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

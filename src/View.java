@@ -1,37 +1,13 @@
-import java.io.File;
 import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Random;
 
-import com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet;
-
-import java.sql.Statement;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.media.AudioClip;
-import javafx.scene.media.AudioSpectrumListener;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaMarkerEvent;
-import javafx.scene.media.MediaPlayer;
-import javafx.util.Duration;
 public class View implements Serializable 
 { 
 	private Model model;

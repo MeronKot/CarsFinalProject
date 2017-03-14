@@ -3,7 +3,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,17 +17,12 @@ import java.util.Random;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.chart.BubbleChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -193,6 +192,8 @@ public class Server extends Application{
 				outputToClient.writeObject(availableRaces);
 				while (true){
 					GamblerDetailsToServer packet = (GamblerDetailsToServer)inputFromClient.readObject();
+					if (packet.isClose())
+						break;
 					if(packet.gamblerClient()){
 						checkAndStartRace(packet);
 						Platform.runLater(new Runnable() {
@@ -223,7 +224,9 @@ public class Server extends Application{
 								ta.appendText("New race " + races + " is opened on " + dateOfRace + "\n");
 							}
 						});
+						break;
 					}
+
 				}
 			} catch (IOException | ClassNotFoundException | NullPointerException | SQLException e) {
 				Platform.runLater(new Runnable() {

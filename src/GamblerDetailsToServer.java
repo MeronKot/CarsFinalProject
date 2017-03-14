@@ -12,7 +12,16 @@ public class GamblerDetailsToServer implements Serializable{
 	private HashMap<Integer,Double> gamblerAmounts;
 	private View gView;
 	private HashMap <Integer,View> gViewList;
+	private boolean close;
 	
+	public boolean isClose() {
+		return close;
+	}
+
+	public void setClose(boolean close) {
+		this.close = close;
+	}
+
 	public GamblerDetailsToServer(){
 	}
 	
