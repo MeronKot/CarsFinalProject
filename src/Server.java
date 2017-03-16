@@ -162,7 +162,7 @@ public class Server extends Application{
 		statement.execute("create table Race(raceId char(5) not null, cars varchar(25), dateOfRace date, totalAmount varchar(25), winCar varchar(25), systemCash varchar(25), "
 				+ "constraint pkRace primary key (raceId))");
 
-		statement.execute("create table Gambler(gamblerId char(5) not null, raceId varchar(25),"
+		statement.execute("create table Gambler(gamblerId char(5) not null, gambleName varchar(25), raceId varchar(25),"
 				+ " car1 varchar(25), car2 varchar(25), car3 varchar(25), car4 varchar(25), car5 varchar(25),"
 				+ " constraint pkGambler primary key (gamblerId),"
 				+ " constraint fkRaceId foreign key (raceId) references Race(raceId))");
@@ -172,6 +172,7 @@ public class Server extends Application{
 
 		statement.execute("create table System(sysId char(5) not null, cash varchar(25)," 
 				+ "constraint pkCar primary key (sysId))");
+				
 	}
 
 	class HandleRace implements Runnable
@@ -263,7 +264,8 @@ public class Server extends Application{
 		int Low = 1;
 		int High = 50;
 
-		modelOfCurrentRace.setGambler(packet.getGamblerAmounts());
+		
+		modelOfCurrentRace.setGambler(packet.getGamblerAmounts(),packet.getGamblerName());
 		if(modelOfCurrentRace.checkIfRaceReady())
 		{
 			try {

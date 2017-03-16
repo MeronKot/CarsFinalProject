@@ -12,10 +12,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import javafx.collections.ObservableMap;
 import javafx.event.EventHandler;
+import javafx.scene.control.Button;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaMarkerEvent;
 import javafx.scene.media.MediaPlayer;
@@ -40,13 +42,16 @@ public class Model implements Serializable
 	static String carsCompete;
 	static double totalGamblingAmount = 0;
 	static double sysProfit = 0;
-	static HashMap<Integer, HashMap<Integer,Double>> gamblers;	private String [] musicFile = {"3 - How Bad Do You Want It - Fast & Furious 7.mp3",
+	static HashMap<Integer, HashMap<Integer,Double>> gamblers;	
+	static HashMap<Integer,String> gamblersNames;
+	private String [] musicFile = {"3 - How Bad Do You Want It - Fast & Furious 7.mp3",
 	"4 - Get Low - Fast & Furious 7.mp3"};
 	private transient Media sound;
 	private transient MediaPlayer mediaPlayer;
 	private Duration length;
 	private int times;
 	private transient ObjectOutputStream outToClientOfThisModel;
+	private Button btnRace;
 
 	public Model(int raceCounter, int gamblerCount, ObjectOutputStream outputToClient) throws SQLException{	
 		this.raceCounter = raceCounter;
@@ -59,6 +64,7 @@ public class Model implements Serializable
 		c5=new Car(4,raceCounter);
 		carsSpeed = new double [5];
 		gamblers = new HashMap<>();
+		gamblersNames = new HashMap<>();
 	}
 
 	public ObjectOutputStream getOutToClientOfThisModel() {
@@ -129,8 +135,9 @@ public class Model implements Serializable
 		}
 	}
 
-	public void setGambler(HashMap<Integer, Double> gamblerAmounts) {
+	public void setGambler(HashMap<Integer, Double> gamblerAmounts,String name) {
 		gamblers.put(gamblerCounter, gamblerAmounts);
+		gamblersNames.put(gamblerCounter, name);
 		gamblerCounter++;
 	}
 	public boolean checkIfRaceReady() {
@@ -147,7 +154,6 @@ public class Model implements Serializable
 				{
 					carsGambling[(int) valuePair.getKey()] = true;
 					totalGamblingAmount += (Double)valuePair.getValue();
-
 				}
 			}
 		}
@@ -196,12 +202,20 @@ public class Model implements Serializable
 	}
 
 	public void saveGamblersDB(Connection con) throws SQLException {
+		Iterator<Entry<Integer, String>> itr = gamblersNames.entrySet().iterator();
+		while(itr.hasNext())
+		{
+			Entry<Integer, String> pair = itr.next();
+			System.out.println(pair.getKey() + " " + pair.getValue());
+		}
+			
 		int idx = 1;
 		Iterator it = gamblers.entrySet().iterator();
 		while(it.hasNext()){
 			Map.Entry pair = (Map.Entry)it.next();
-			PreparedStatement pst = con.prepareStatement("insert into gambler values(?,?,?,?,?,?,?)");
+			PreparedStatement pst = con.prepareStatement("insert into gambler values(?,?,?,?,?,?,?,?)");
 			pst.setString(idx++, String.valueOf((Integer)pair.getKey() + 1));
+			pst.setString(idx++, gamblersNames.get((Integer)pair.getKey()));
 			pst.setString(idx++, String.valueOf(raceCounter));
 			HashMap<Integer, Double> amounts = (HashMap<Integer, Double>) pair.getValue();
 			Iterator itValue = amounts.entrySet().iterator();
@@ -264,6 +278,7 @@ public class Model implements Serializable
  			}
  		});
 		 */
+		btnRace.setVisible(false);
 		mediaPlayer.play();
 	}
 
@@ -321,7 +336,8 @@ public class Model implements Serializable
 	}
 
 
-	public void configureMedia() {
+	public void configureMedia(Button btnRace) {
+		this.btnRace = btnRace;
 		Connection con;
 		try {
 			con = DriverManager.getConnection
@@ -366,6 +382,7 @@ public class Model implements Serializable
 							} catch (SQLException e) {
 								System.out.println(e.getMessage());
 							}
+							btnRace.setVisible(true);
 						}
 					});
 				}

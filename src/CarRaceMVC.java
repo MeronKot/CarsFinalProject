@@ -113,26 +113,6 @@ public class CarRaceMVC extends Application
 					if(isServerOn){
 						new Gambler().start(gambler);
 
-						new Thread(new Runnable() {
-
-							@Override
-							public void run() {
-								try {
-									if(fromServer != null){
-										PacketToClient play = (PacketToClient) fromServer.readObject();
-										if (play.isPlay())
-										{
-											play.getGamModel().playSong();
-										}
-									}
-								} catch (SQLException | ClassNotFoundException | IOException e) {
-									// TODO Auto-generated catch block
-									System.out.println(e.getMessage());
-								}
-
-							}
-						}).start();
-
 					}else{
 						alert(AlertType.ERROR, "You should run the server first");
 					}
@@ -159,7 +139,7 @@ public class CarRaceMVC extends Application
 			PacketToClient input = (PacketToClient) fromServer.readObject();
 			View view = new View();
 			model = input.getGamModel();
-			model.configureMedia();
+			model.configureMedia(btnRace);
 			view.setModel(model);
 			Controller controller = new Controller(input.getGamModel(),view);
 			Stage race = new Stage();
@@ -185,8 +165,7 @@ public class CarRaceMVC extends Application
 					try {
 						while(true){
 							if(fromServer != null){
-								PacketToClient play = (PacketToClient) fromServer.readObject();
-
+								PacketToClient play = (PacketToClient) fromServer.readObject();	
 								if (play.isPlay())
 								{
 									play.getGamModel().playSong();

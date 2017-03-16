@@ -42,14 +42,9 @@ public class Gambler extends Application {
 	private ObjectInputStream fromServer;
 	private Stage currentStage;
 	private int raceId;
-	private View view;
-	private HashMap <Integer,View> viewList = new HashMap<>();
-	private PacketToClient recivedPacket;
-	private Connection con;
-	private Model model;
-	private int pRaces;
-
-
+	private String name;
+	
+	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
@@ -67,12 +62,14 @@ public class Gambler extends Application {
 
 		//Active races: + listView of races
 		HBox activeRacesPane = createActiveRacesPane();		
-		mainPane.setTop(activeRacesPane);
+		mainPane.setCenter(activeRacesPane);
 
 		//Car #n + text area for each car to put money
 		GridPane carsGambling = createCarsGamblingPane();
-		mainPane.setCenter(carsGambling);
-
+		HBox userDetails = createUserDetails();
+		mainPane.setTop(userDetails);
+		mainPane.setBottom(carsGambling);
+		
 
 		Scene scene = new Scene(mainPane,250,350);
 		currentStage = primaryStage;
@@ -95,6 +92,29 @@ public class Gambler extends Application {
 						primaryStage.close();
 					} 
 				});
+	}
+
+	private HBox createUserDetails() {
+		HBox userDetails = new HBox(20);
+		userDetails.setAlignment(Pos.CENTER);
+		Label nameL = new Label("Name: ");
+		TextArea nameField = new TextArea();
+		nameField.setPrefSize(100, 5);
+		Button ok = new Button("Submit");
+		userDetails.getChildren().addAll(nameL,nameField,ok);
+		ok.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				if(nameField.getText().equals(""))
+					alert(AlertType.ERROR, "You need to enter name");
+				else{
+					name = nameField.getText().trim();
+					alert(AlertType.CONFIRMATION, "hello " + name);
+				}
+			}
+		});
+		return userDetails;
 	}
 
 	private HBox createActiveRacesPane(){
@@ -149,6 +169,12 @@ public class Gambler extends Application {
 		go.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
+				if (name == null){
+					alert(AlertType.ERROR, "Enter name please");
+					return;
+				}
+				
+				
 				if (availableRaces.size() > 0){
 					HashMap<Integer,Double> arr = new HashMap<>();
 					try
@@ -161,7 +187,7 @@ public class Gambler extends Application {
 							}
 
 						raceId = races.getSelectionModel().getSelectedItem();
-						GamblerDetailsToServer packet = new GamblerDetailsToServer(arr,raceId);
+						GamblerDetailsToServer packet = new GamblerDetailsToServer(name,arr,raceId);
 						toServer.writeObject(packet);
 						alert(AlertType.INFORMATION,"Goodluck");
 						try {
